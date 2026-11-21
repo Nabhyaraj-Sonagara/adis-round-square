@@ -1,0 +1,274 @@
+/* Home: hero art, IDEALS, newsletter reader and RS Bulletin. */
+(function () {
+  const RS = window.RS;
+  const { esc, $, $$, dateBlock, parseDate, foundEgg, reduceMotion, spotsLeft } = window.RSU;
+  const order = ["I", "D", "E", "A", "L", "S"];
+  const tones = { I: "purple", D: "blue", E: "red", A: "purple", L: "blue", S: "red" };
+  const toneHex = { purple: "#7f3286", blue: "#1b478a", red: "#e60048" };
+  const now = new Date();
+  const upcoming = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+  /* ---------- Hero art ---------- */
+  const svg = $("#hero-svg");
+  const NS = "http://www.w3.org/2000/svg";
+  const mini = $("#mini-ideals");
+  const miniDots = order.map((k, i) => {
+    const g = document.createElementNS(NS, "g");
+    const cx = 320 + (i % 3) * 64, cy = 238 + Math.floor(i / 3) * 70;
+    g.innerHTML = `<circle cx="${cx}" cy="${cy}" r="22" fill="${toneHex[tones[k]]}"/><text x="${cx}" y="${cy + 5}" fill="#fff">${k}</text>`;
+    g.style.transformOrigin = `${cx}px ${cy}px`;
+    mini.appendChild(g);
+    return g;
+  });
+
+  // Rays fan out and the Round Square circle watches the pointer.
+  const rays = $$("#rays line");
+  const ball = $("#rs-ball");
+  const follow = document.createElementNS(NS, "g");
+  ball.parentNode.insertBefore(follow, ball);
+  follow.appendChild(ball);
+  ball.style.transformBox = "fill-box";
+  ball.style.transformOrigin = "center";
+  function aim(px, py) {
+    rays.forEach((r, i) => r.setAttribute("transform", `rotate(${(px - 0.5) * (8 + i * 5)} 96 360)`));
+    const dx = Math.max(-1, Math.min(1, (px * 480 - 384) / 200)) * 18;
+    const dy = Math.max(-1, Math.min(1, (py * 360 - 96) / 200)) * 18;
+    follow.setAttribute("transform", `translate(${dx.toFixed(1)} ${dy.toFixed(1)})`);
+  }
+  if (!reduceMotion) {
+    svg.addEventListener("pointermove", (e) => {
+      const b = svg.getBoundingClientRect();
+      aim((e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height);
+    });
+    svg.addEventListener("pointerleave", () => aim(0.5, 0.27));
+  }
+  const boing = () => ball.animate(
+    [{ transform: "scale(1)" }, { transform: "scale(.7,1.2)" }, { transform: "scale(1.15,.85)" }, { transform: "scale(1)" }],
+    { duration: 600, easing: "cubic-bezier(.34,1.56,.64,1)" }
+  );
+  ball.addEventListener("click", boing);
+
+  // The one orchestrated moment: the sun rises, its rays reach out, the circle drops into its square,
+  // and the six IDEALS land one by one.
+  if (!reduceMotion) {
+    const bounce = "cubic-bezier(.34,1.4,.64,1)";
+    $("#sun").animate([{ transform: "translateY(110px)" }, { transform: "none" }], { duration: 900, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+    rays.forEach((r, i) => {
+      const len = Math.hypot(r.x2.baseVal.value - 96, r.y2.baseVal.value - 360);
+      r.style.strokeDasharray = len;
+      r.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 700, delay: 500 + i * 90, easing: "ease-out", fill: "backwards" })
+        .onfinish = () => (r.style.strokeDasharray = "");
+    });
+    ball.animate([{ transform: "translateY(-190px)" }, { transform: "none" }], { duration: 900, delay: 900, easing: bounce, fill: "backwards" });
+    miniDots.forEach((d, i) => d.animate([{ transform: "scale(0)" }, { transform: "scale(1)" }], { duration: 450, delay: 1400 + i * 110, easing: bounce, fill: "backwards" }));
+  }
+  ball.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); boing(); } });
+
+  // Egg: click the rising sun three times for a sunrise.
+  const sun = $("#sun");
+  const core = $("#sun-core");
+  let sunClicks = 0, sunTimer, sunriseTimer;
+  function pokeSun() {
+    core.animate([{ r: "66px" }, { r: "76px" }, { r: "66px" }], { duration: 400, easing: "ease-out" });
+    sunClicks++;
+    clearTimeout(sunTimer);
+    sunTimer = setTimeout(() => (sunClicks = 0), 1200);
+    if (sunClicks >= 3) {
+      sunClicks = 0;
+      document.body.classList.add("sunrise");
+      foundEgg("sunrise");
+      clearTimeout(sunriseTimer);
+      sunriseTimer = setTimeout(() => document.body.classList.remove("sunrise"), 4500);
+    }
+  }
+  sun.addEventListener("click", pokeSun);
+  sun.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pokeSun(); } });
+
+  /* ---------- IDEALS ---------- */
+  let filter = "all";
+  const idealsEl = $("#ideals");
+  idealsEl.innerHTML = order.map((k) => `
+    <button class="ideal" data-k="${k}" data-tone="${tones[k]}" aria-pressed="false">
+      ${k === RS.config.idealOfFortnight ? '<span class="focus-badge">Now</span>' : ""}
+      <span class="ring" aria-hidden="true">${k}</span>
+      <span class="name">${esc(RS.ideals[k].name)}</span>
+    </button>`).join("");
+
+  const detail = $("#ideal-detail");
+  function showIdeal(k) {
+    const isNow = k === RS.config.idealOfFortnight;
+    detail.innerHTML = `
+      <span class="focus-dot" aria-hidden="true">${k}</span>
+      <div>
+        <span class="eyebrow dot-eyebrow">${isNow ? "Ideal of the fortnight" : "Round Square IDEAL"}</span>
+        <p class="title">${esc(RS.ideals[k].name)}</p>
+        <p>${esc(RS.ideals[k].blurb)}</p>
+      </div>`;
+    detail.classList.remove("bump"); void detail.offsetWidth; detail.classList.add("bump");
+  }
+  showIdeal(RS.config.idealOfFortnight);
+
+  idealsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".ideal");
+    if (!btn) return;
+    const k = btn.dataset.k;
+    const on = btn.getAttribute("aria-pressed") !== "true";
+    setFilter(on ? k : "all");
+    showIdeal(on ? k : RS.config.idealOfFortnight);
+  });
+
+  /* ---------- Newsletter reader ---------- */
+  const tabs = $("#issue-tabs");
+  const paper = $("#paper");
+  tabs.innerHTML = RS.newsletters.map((n, i) => `
+    <button class="issue-tab" role="tab" id="tab-${n.id}" aria-selected="${i === 0}" data-i="${i}">
+      Issue ${esc(n.id)}${i === 0 ? " (latest)" : ""}<small>${esc(n.dates)}</small>
+    </button>`).join("");
+
+  function photoArt(seed) {
+    // A placeholder in the brand's shapes. Swap for a real photo: <img src="..." alt="...">.
+    const c = ["#7f3286", "#1b478a", "#e60048", "#d59600"];
+    const r = (n) => ((Math.sin(seed * 99 + n * 13.7) + 1) / 2);
+    let s = `<rect width="300" height="200" fill="#f2ede4"/>`;
+    for (let i = 0; i < 7; i++) {
+      const col = c[i % 4], x = r(i) * 300, y = r(i + 9) * 200, size = 20 + r(i + 3) * 60;
+      s += i % 2 ? `<circle cx="${x}" cy="${y}" r="${size / 2}" fill="${col}" opacity=".9"/>` : `<rect x="${x - size / 2}" y="${y - size / 2}" width="${size}" height="${size}" fill="${col}" opacity=".9"/>`;
+    }
+    return `<svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${s}<circle cx="150" cy="210" r="70" fill="#fff" opacity=".6"/></svg>`;
+  }
+
+  function renderIssue(i) {
+    const n = RS.newsletters[i];
+    const ideal = RS.ideals[n.ideal];
+    const coming = upcoming.slice(0, 3);
+    paper.setAttribute("aria-labelledby", `tab-${n.id}`);
+    paper.innerHTML = `
+      <div class="paper-mast">
+        <div>
+          <span class="eyebrow muted">Issue ${esc(n.id)} · ${esc(n.dates)}</span>
+          <h3 class="display">Common Ground</h3>
+          <p class="caption" style="margin:8px 0 0">The Adani International School × Round Square newsletter</p>
+        </div>
+        <div class="lockup" aria-hidden="true">
+          <img src="assets/adis-crest.png" alt="" style="height:48px"><span class="divider"></span><img src="assets/round-square-mark.png" alt="" style="height:48px">
+        </div>
+      </div>
+      <div class="band" aria-hidden="true"><span class="b-purple"></span><span class="b-blue"></span><span class="b-red"></span><span class="b-gold"></span></div>
+      <section class="focus">
+        <span class="focus-dot" aria-hidden="true">${n.ideal}</span>
+        <div><span class="eyebrow dot-eyebrow">Ideal of the fortnight</span><p class="title">${esc(ideal.name)}</p><p>${esc(ideal.blurb)}</p></div>
+      </section>
+      <p class="lead intro">${esc(n.intro)}</p>
+      <div class="paper-body">
+        <div class="col">
+          <article class="story">
+            <div class="photo">${photoArt(+n.id)}</div>
+            <p class="caption" style="margin:8px 0 16px">${esc(n.lead.caption)}</p>
+            <span class="eyebrow dot-eyebrow adis">Lead story</span>
+            <h3 class="headline">${esc(n.lead.title)}</h3>
+            <p>${esc(n.lead.body)}</p>
+          </article>
+          <div class="net-pair">
+            ${n.network.map((s) => `<article><span class="eyebrow dot-eyebrow">${esc(s.school)}</span><h4>${esc(s.title)}</h4><p>${esc(s.body)}</p></article>`).join("")}
+          </div>
+        </div>
+        <div class="col">
+          <article class="story">
+            <span class="eyebrow dot-eyebrow adis">At ADIS</span>
+            <h3 class="title">${esc(n.adis.title)}</h3>
+            <p>${esc(n.adis.body)}</p>
+          </article>
+          <aside class="coming-up">
+            <h3 class="title">Coming up</h3>
+            <ul class="events">${coming.map((e, j) => `
+              <li>${dateBlock(e.date, j % 2 === 1)}<div><h4>${esc(e.title)}</h4><p class="caption">${esc(e.place.split(" · ")[0])}</p></div></li>`).join("")}
+            </ul>
+            <a class="btn primary" href="register.html" style="margin-top:16px">Register</a>
+          </aside>
+          <figure class="pull">
+            <blockquote class="quote">“${esc(n.quote.text)}”</blockquote>
+            <figcaption class="caption">${esc(n.quote.by)}</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="band" aria-hidden="true"><span class="b-purple"></span><span class="b-blue"></span><span class="b-red"></span><span class="b-gold"></span></div>
+      <div class="paper-foot">
+        <span class="caption">Common Ground · Issue ${esc(n.id)} · ${esc(n.dates)}</span>
+        ${n.pdf ? `<a class="btn secondary" href="${esc(n.pdf)}" download>Download the PDF</a>` : `<span class="caption">PDF edition on the notice boards</span>`}
+      </div>`;
+  }
+
+  let current = 0;
+  renderIssue(0);
+  tabs.addEventListener("click", (e) => {
+    const btn = e.target.closest(".issue-tab");
+    if (!btn) return;
+    const i = +btn.dataset.i;
+    if (i === current) return;
+    current = i;
+    $$(".issue-tab", tabs).forEach((t) => t.setAttribute("aria-selected", t === btn));
+    if (reduceMotion) return renderIssue(i);
+    paper.classList.add("turning");
+    setTimeout(() => {
+      renderIssue(i);
+      paper.classList.remove("turning");
+      paper.classList.add("arriving");
+      void paper.offsetWidth;
+      paper.classList.remove("arriving");
+    }, 450);
+  });
+
+  /* ---------- RS Bulletin: highlights ---------- */
+  const filters = $("#hl-filters");
+  filters.innerHTML = `<button class="chip plain" data-k="all" aria-pressed="true">All</button>` +
+    order.map((k) => `<button class="chip" data-k="${k}" aria-pressed="false"><b>${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
+  filters.addEventListener("click", (e) => {
+    const c = e.target.closest(".chip");
+    if (c) setFilter(c.dataset.k === filter && c.dataset.k !== "all" ? "all" : c.dataset.k);
+  });
+
+  const hlEl = $("#highlights");
+  function renderHighlights() {
+    const list = RS.highlights.filter((h) => filter === "all" || h.ideal === filter);
+    hlEl.innerHTML = list.length ? list.map((h, i) => `
+      <article class="hl ${h.tone === "rs" ? "rs" : ""}">
+        <span class="letter" aria-hidden="true">${h.ideal}</span>
+        <span class="caption">${esc(RS.ideals[h.ideal].name)}, ${parseDate(h.date).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}</span>
+        <h3>${esc(h.title)}</h3>
+        <p>${esc(h.body)}</p>
+      </article>`).join("") : `<p class="empty" style="grid-column:1/-1">No highlights for ${esc(RS.ideals[filter].name)} yet. Be the first: <a href="register.html">join an event</a>.</p>`;
+  }
+  function setFilter(k) {
+    filter = k;
+    $$(".chip", filters).forEach((c) => c.setAttribute("aria-pressed", c.dataset.k === k));
+    $$(".ideal", idealsEl).forEach((b) => b.setAttribute("aria-pressed", b.dataset.k === k));
+    renderHighlights();
+  }
+  renderHighlights();
+
+  /* ---------- RS Bulletin: upcoming with live countdowns ---------- */
+  const upEl = $("#upcoming");
+  upEl.innerHTML = upcoming.map((e, i) => `
+    <li>
+      ${dateBlock(e.date, i % 2 === 1)}
+      <div class="info">
+        <h4>${esc(e.title)}</h4>
+        <p class="caption">${esc(e.place.split(" · ")[0])}, ${spotsLeft(e)} spots left</p>
+        <p class="countdown" data-t="${parseDate(e.date).getTime()}"></p>
+      </div>
+      <a class="go" href="register.html?event=${encodeURIComponent(e.id)}" aria-label="Register for ${esc(e.title)}">→</a>
+    </li>`).join("");
+  const pad = (n) => String(n).padStart(2, "0");
+  function tick() {
+    const t = Date.now();
+    $$(".countdown", upEl).forEach((el) => {
+      let s = Math.max(0, Math.floor((+el.dataset.t - t) / 1000));
+      const d = Math.floor(s / 86400); s %= 86400;
+      const h = Math.floor(s / 3600); s %= 3600;
+      const m = Math.floor(s / 60); s %= 60;
+      el.textContent = `Starts in ${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+    });
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
