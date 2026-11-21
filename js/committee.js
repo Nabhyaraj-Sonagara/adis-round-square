@@ -3,11 +3,9 @@
   const RS = window.RS;
   const { esc, $, $$, toast, foundEgg, confetti } = window.RSU;
   const groups = [
-    { key: "core", label: "Office bearers" },
-    { key: "ideals", label: "IDEALS leads" },
-    { key: "staff", label: "Staff" },
+    { key: "students", label: "Student committee" },
+    { key: "teachers", label: "Teachers" },
   ];
-  const tone = { I: "purple", D: "blue", E: "red", A: "purple", L: "blue", S: "red" };
   // Easter egg: search for the educator whose ideas started Round Square.
   const HAHN = { name: "Kurt Hahn", role: "Honorary member", group: "honorary", grade: "1886–1974", email: "", phone: "", ideal: "A", fact: "The educator whose ideas inspired Round Square in 1966. His motto: Plus est en vous, there is more in you." };
 
@@ -37,10 +35,10 @@
       <div class="member ${extra}">
         <div class="flip">
           <button class="face front" aria-label="${esc(m.name)}, ${esc(m.role)}. Show contact details">
-            <span class="avatar" data-tone="${tone[m.ideal]}" data-ideal="${m.ideal}" aria-hidden="true">${esc(initials(m.name))}</span>
-            <span class="eyebrow dot-eyebrow ${m.group === "staff" ? "blue" : m.group === "core" ? "adis" : ""} role">${esc(m.role)}</span>
+            <span class="avatar" data-i="${m.ideal}" data-ideal="${m.ideal}" aria-hidden="true">${esc(initials(m.name))}</span>
+            <span class="eyebrow dot-eyebrow ${m.group === "teachers" ? "blue" : "adis"} role">${esc(m.role)}</span>
             <span class="name">${esc(m.name)}</span>
-            <span class="caption">${m.group === "staff" || m.group === "honorary" ? esc(m.grade) : `Grade ${esc(m.grade)}`}, ${esc(RS.ideals[m.ideal].name)}</span>
+            <span class="caption">${m.group === "teachers" || m.group === "honorary" ? esc(m.grade) : `Grade ${esc(m.grade)}`}, ${esc(RS.ideals[m.ideal].name)}</span>
             <span class="flip-hint" aria-hidden="true">↻</span>
           </button>
           <div class="face back" inert>

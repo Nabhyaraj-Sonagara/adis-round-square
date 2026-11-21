@@ -63,38 +63,39 @@ window.RS = {
   ],
 
   highlights: [
-    { title: "Budget vote: the anganwadi reading corner wins", ideal: "D", date: "2026-11-20", body: "60% of the service fund goes to a reading corner chosen by the whole school.", tone: "adis" },
-    { title: "Riverfront clean-up lifts 180 kg of waste", ideal: "E", date: "2026-11-08", body: "Sixty students, one Saturday, a lot of gloves.", tone: "rs" },
-    { title: "Baraza with Kenya, Peru and Canada", ideal: "I", date: "2026-11-18", body: "Twelve students compared how their schools make rules.", tone: "rs" },
-    { title: "Grade 10 summits Kalsubai", ideal: "A", date: "2026-10-25", body: "The highest peak in Maharashtra, before sunrise.", tone: "adis" },
-    { title: "Peer tutors log 400 hours", ideal: "S", date: "2026-11-14", body: "Senior students now tutor every weekday after school.", tone: "adis" },
-    { title: "New committee leads take office", ideal: "L", date: "2026-11-03", body: "Six students sworn in to lead the IDEALS teams.", tone: "rs" },
+    { title: "Budget vote: the anganwadi reading corner wins", ideal: "D", date: "2026-11-20", body: "60% of the service fund goes to a reading corner chosen by the whole school." },
+    { title: "Riverfront clean-up lifts 180 kg of waste", ideal: "E", date: "2026-11-08", body: "Sixty students, one Saturday, a lot of gloves." },
+    { title: "Baraza with Kenya, Peru and Canada", ideal: "I", date: "2026-11-18", body: "Twelve students compared how their schools make rules." },
+    { title: "Grade 10 summits Kalsubai", ideal: "A", date: "2026-10-25", body: "The highest peak in Maharashtra, before sunrise." },
+    { title: "Peer tutors log 400 hours", ideal: "S", date: "2026-11-14", body: "Senior students now tutor every weekday after school." },
+    { title: "New student committee takes office", ideal: "L", date: "2026-11-03", body: "Five students sworn in to run Round Square at ADIS this year." },
   ],
 
-  // `type`: "event" (one-off) or "project" (ongoing). `date` in ISO, local time.
+  // `tag` decides the filter on the Register page (keys in `tags` below). `date` in ISO, local time.
+  tags: {
+    lab: { one: "Study lab", many: "Study labs" },
+    postcard: { one: "Zoom Postcard", many: "Zoom Postcards" },
+    collab: { one: "Collaboration", many: "Collaborations" },
+    conference: { one: "Conference", many: "Conferences" },
+  },
   events: [
-    { id: "baraza-dec", type: "event", title: "Round Square Baraza: Democracy in action", ideal: "D", date: "2026-12-03T16:00", place: "Zoom · Room 204 for the call", grades: "9–12", spots: 20, taken: 13, body: "A small-group discussion with students from four Round Square schools. Bring one rule from your school you'd change." },
-    { id: "beach-cleanup", type: "event", title: "Dumas beach clean-up", ideal: "E", date: "2026-12-12T07:00", place: "Dumas beach, Surat · bus from school 05:30", grades: "7–12", spots: 45, taken: 31, body: "A morning clean-up with a partner NGO. Parent consent needed; breakfast provided." },
-    { id: "anganwadi", type: "project", title: "Anganwadi reading corner", ideal: "S", date: "2026-12-07T14:00", place: "Shantigram anganwadi · weekly, Mondays", grades: "8–12", spots: 16, taken: 9, body: "Build and run the reading corner the school voted for. Storytelling, shelves and a lot of paint." },
-    { id: "mun-grade8", type: "project", title: "Model UN for Grade 8", ideal: "I", date: "2027-01-08T15:30", place: "ADIS auditorium · Fridays", grades: "8", spots: 30, taken: 4, body: "A new Model UN track for Grade 8, run by senior delegates." },
-    { id: "trek-jan", type: "event", title: "Saputara winter trek", ideal: "A", date: "2027-01-23T06:00", place: "Saputara hills · 2 days", grades: "9–11", spots: 24, taken: 22, body: "Two days, one night under canvas. Fitness check in early January." },
-    { id: "lead-lab", type: "event", title: "Leadership lab: running a meeting", ideal: "L", date: "2027-02-06T13:00", place: "Seminar hall", grades: "7–12", spots: 40, taken: 12, body: "A hands-on workshop by the committee: agendas, minutes and getting everyone heard." },
+    { id: "postcard-democracy", tag: "postcard", title: "Round Square Postcard: Democracy in action", ideal: "D", date: "2026-12-03T16:00", place: "Zoom · Room 204 for the call", grades: "9–12", spots: 20, taken: 13, body: "A small-group discussion with students from four Round Square schools. Bring one rule from your school you'd change." },
+    { id: "anganwadi", tag: "collab", title: "Anganwadi reading corner", ideal: "S", date: "2026-12-07T14:00", place: "Shantigram anganwadi · weekly, Mondays", grades: "8–12", spots: 16, taken: 9, body: "Build and run the reading corner the school voted for, with the anganwadi staff. Storytelling, shelves and a lot of paint." },
+    { id: "beach-cleanup", tag: "collab", title: "Dumas beach clean-up", ideal: "E", date: "2026-12-12T07:00", place: "Dumas beach, Surat · bus from school 05:30", grades: "7–12", spots: 45, taken: 31, body: "A morning clean-up with a partner NGO. Parent consent needed; breakfast provided." },
+    { id: "postcard-plastic", tag: "postcard", title: "Round Square Postcard: Plastic-free campuses", ideal: "E", date: "2026-12-17T16:30", place: "Zoom · Library seminar room", grades: "7–10", spots: 25, taken: 8, body: "Schools from three continents share one change that cut plastic on their campus. We present our steel-plate canteen." },
+    { id: "mun-lab", tag: "lab", title: "Model UN study lab for Grade 8", ideal: "I", date: "2027-01-08T15:30", place: "ADIS auditorium · Fridays", grades: "8", spots: 30, taken: 4, body: "Learn to research a country, write a position paper and speak in committee, coached by senior delegates." },
+    { id: "regional-conference", tag: "conference", title: "Round Square regional conference: delegation trials", ideal: "A", date: "2027-01-23T09:00", place: "Seminar hall · trials for the 3-day conference", grades: "9–11", spots: 24, taken: 22, body: "Try out for the ADIS delegation. Bring a two-minute talk on an IDEAL that matters to you." },
+    { id: "lead-lab", tag: "lab", title: "Leadership study lab: running a meeting", ideal: "L", date: "2027-02-06T13:00", place: "Seminar hall", grades: "7–12", spots: 40, taken: 12, body: "A hands-on workshop by the committee: agendas, minutes and getting everyone heard." },
   ],
 
-  // `group`: "core" (office bearers), "ideals" (IDEAL leads), "staff".
+  // `group`: "students" (the student committee) or "teachers".
   committee: [
-    { name: "Aarav Mehta", role: "President", group: "core", grade: "12 A", email: "president.rs@adis.example", phone: "+91 98000 00001", ideal: "L", fact: "Has never missed a Baraza." },
-    { name: "Ishita Rao", role: "Vice President", group: "core", grade: "12 C", email: "vp.rs@adis.example", phone: "+91 98000 00002", ideal: "D", fact: "Wrote the committee's constitution." },
-    { name: "Kabir Shah", role: "Secretary", group: "core", grade: "11 B", email: "secretary.rs@adis.example", phone: "+91 98000 00003", ideal: "D", fact: "Takes minutes faster than anyone talks." },
-    { name: "Meher Joshi", role: "Treasurer", group: "core", grade: "11 A", email: "treasurer.rs@adis.example", phone: "+91 98000 00004", ideal: "S", fact: "Ran the service fund vote." },
-    { name: "Ananya Patel", role: "Editor, Common Ground", group: "core", grade: "11 D", email: "editor.rs@adis.example", phone: "", ideal: "I", fact: "Edits every issue of the newsletter." },
-    { name: "Vihaan Desai", role: "Internationalism lead", group: "ideals", grade: "10 B", email: "internationalism.rs@adis.example", phone: "", ideal: "I", fact: "Pen pals in five countries." },
-    { name: "Sara Thomas", role: "Democracy lead", group: "ideals", grade: "10 A", email: "democracy.rs@adis.example", phone: "", ideal: "D", fact: "Counted 300 ballots by hand." },
-    { name: "Reyansh Iyer", role: "Environmentalism lead", group: "ideals", grade: "10 C", email: "environment.rs@adis.example", phone: "", ideal: "E", fact: "Started the steel-plate canteen." },
-    { name: "Diya Kapoor", role: "Adventure lead", group: "ideals", grade: "11 C", email: "adventure.rs@adis.example", phone: "", ideal: "A", fact: "First up Kalsubai this year." },
-    { name: "Arjun Nair", role: "Leadership lead", group: "ideals", grade: "9 A", email: "leadership.rs@adis.example", phone: "", ideal: "L", fact: "Youngest lead on the committee." },
-    { name: "Zara Khan", role: "Service lead", group: "ideals", grade: "10 D", email: "service.rs@adis.example", phone: "", ideal: "S", fact: "Peer tutor, 80 hours and counting." },
-    { name: "Ms. Priya Sharma", role: "Round Square Representative", group: "staff", grade: "Faculty", email: "rs.rep@adis.example", phone: "+91 79000 00010", ideal: "I", fact: "Your first stop for exchanges and conferences." },
-    { name: "Mr. Rohan Verma", role: "Service Coordinator", group: "staff", grade: "Faculty", email: "service.coord@adis.example", phone: "+91 79000 00011", ideal: "S", fact: "Signs off every off-campus trip." },
+    { name: "Aarav Mehta", role: "President", group: "students", grade: "12 A", email: "president.rs@adis.example", phone: "+91 98000 00001", ideal: "L", fact: "Has never missed a Baraza." },
+    { name: "Ishita Rao", role: "Vice President", group: "students", grade: "12 C", email: "vp.rs@adis.example", phone: "+91 98000 00002", ideal: "D", fact: "Wrote the committee's constitution." },
+    { name: "Kabir Shah", role: "Secretary", group: "students", grade: "11 B", email: "secretary.rs@adis.example", phone: "+91 98000 00003", ideal: "D", fact: "Takes minutes faster than anyone talks." },
+    { name: "Meher Joshi", role: "Treasurer", group: "students", grade: "11 A", email: "treasurer.rs@adis.example", phone: "+91 98000 00004", ideal: "S", fact: "Ran the service fund vote." },
+    { name: "Ananya Patel", role: "Editor, Common Ground", group: "students", grade: "11 D", email: "editor.rs@adis.example", phone: "", ideal: "I", fact: "Edits every issue of the newsletter." },
+    { name: "Ms. Priya Sharma", role: "Round Square Representative", group: "teachers", grade: "Teacher", email: "rs.rep@adis.example", phone: "+91 79000 00010", ideal: "I", fact: "Your first stop for exchanges and conferences." },
+    { name: "Mr. Rohan Verma", role: "Service Coordinator", group: "teachers", grade: "Teacher", email: "service.coord@adis.example", phone: "+91 79000 00011", ideal: "S", fact: "Signs off every off-campus trip." },
   ],
 };

@@ -10,8 +10,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Opening animation: once per visit, never for people who prefer reduced motion.
+    try {
+      if (!sessionStorage.getItem("rs-intro-seen") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("intro");
+        sessionStorage.setItem("rs-intro-seen", "1");
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body data-page="home">
+  <div class="intro-overlay" aria-hidden="true">
+    <div class="intro-cols"><span class="b-purple"></span><span class="b-blue"></span><span class="b-red"></span><span class="b-gold"></span></div>
+    <div class="intro-badge">
+      <img src="assets/adis-crest.png" alt=""><span class="divider"></span><img src="assets/round-square-mark.png" alt="">
+    </div>
+  </div>
   <header id="site-header"></header>
 
   <main>

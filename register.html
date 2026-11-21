@@ -42,14 +42,9 @@
               <!-- Step 1 -->
               <div class="panel" data-step="1">
                 <h2 class="headline">What would you like to join?</h2>
-                <p class="muted">Events happen once. Projects run every week for the term.</p>
-                <div class="chips" id="type-filter" role="group" aria-label="Show">
-                  <button type="button" class="chip plain" data-t="all" aria-pressed="true">Everything</button>
-                  <button type="button" class="chip plain" data-t="event" aria-pressed="false">Events</button>
-                  <button type="button" class="chip plain" data-t="project" aria-pressed="false">Projects</button>
-                </div>
+                <div class="chips" id="type-filter" role="group" aria-label="Filter by type"></div>
                 <fieldset style="border:0;padding:0;margin:0">
-                  <legend class="visually-hidden">Choose an event or project</legend>
+                  <legend class="visually-hidden">Choose what to join</legend>
                   <div class="event-picks" id="picks"></div>
                 </fieldset>
                 <p class="pick-error" id="pick-error" role="alert">Pick an event or project first.</p>

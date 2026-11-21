@@ -15,7 +15,7 @@
   /* ---------- Step 1: pick ---------- */
   const picksEl = $("#picks");
   function renderPicks() {
-    const list = events.filter((e) => typeFilter === "all" || e.type === typeFilter);
+    const list = events.filter((e) => typeFilter === "all" || e.tag === typeFilter);
     picksEl.innerHTML = list.map((e, i) => {
       const left = spotsLeft(e), mine = regs.has(e.id), full = left === 0 && !mine;
       const pct = Math.round(((e.spots - left) / e.spots) * 100);
@@ -25,7 +25,7 @@
           <label for="ev-${e.id}">
             <span class="check" aria-hidden="true">✓</span>
             <span class="top">${dateBlock(e.date, i % 2 === 1)}<span>
-              <span class="type-tag ${mine ? "mine" : e.type}">${mine ? "You're in" : e.type === "project" ? "Weekly project" : "One-off event"}</span>
+              <span class="type-tag ${mine ? "mine" : `t-${e.tag}`}">${mine ? "You're in" : esc(RS.tags[e.tag].one)}</span>
               <span class="caption" style="display:block;margin-top:6px">${fmtTime(e.date)}, Grades ${esc(e.grades)}</span>
             </span></span>
             <h3>${esc(e.title)}</h3>
@@ -35,8 +35,10 @@
             <span class="meter ${left <= 5 ? "low" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span>
           </label>
         </div>`;
-    }).join("") || `<p class="empty" style="grid-column:1/-1">Nothing to sign up for right now. New events go up every fortnight.</p>`;
+    }).join("") || `<p class="empty" style="grid-column:1/-1">Nothing here right now. New events go up every fortnight.</p>`;
   }
+  $("#type-filter").innerHTML = `<button type="button" class="chip plain" data-t="all" aria-pressed="true">Everything</button>` +
+    Object.entries(RS.tags).map(([k, t]) => `<button type="button" class="chip plain" data-t="${k}" aria-pressed="false">${esc(t.many)}</button>`).join("");
   $("#type-filter").addEventListener("click", (e) => {
     const c = e.target.closest(".chip");
     if (!c) return;
@@ -53,7 +55,7 @@
 
   /* ---------- Step 3: IDEALS chips ---------- */
   const why = new Set();
-  $("#why-ideals").innerHTML = order.map((k) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false"><b>${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
+  $("#why-ideals").innerHTML = order.map((k) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false"><b data-i="${k}">${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
   $("#why-ideals").addEventListener("click", (e) => {
     const c = e.target.closest(".chip");
     if (!c) return;
@@ -70,7 +72,7 @@
       <p class="caption" style="margin:0">Your pick</p>
       <h3 class="title">${esc(e.title)}</h3>
       <ul class="events"><li>${dateBlock(e.date)}<div><p class="caption" style="color:var(--ink)">${fmtLong(e.date)}</p><p class="caption">${fmtTime(e.date)}, ${esc(e.place.split(" · ")[0])}</p></div></li></ul>`
-      : `<p class="caption" style="margin:0">Your pick</p><p class="none" style="margin-top:8px">Choose an event or project and it will show up here.</p>`;
+      : `<p class="caption" style="margin:0">Your pick</p><p class="none" style="margin-top:8px">Choose what you'd like to join and it will show up here.</p>`;
   }
   function renderMine() {
     const list = regs.all().filter((r) => byId(r.eventId));
@@ -186,7 +188,7 @@
     $("#ticket").innerHTML = `
       <div class="ticket">
         <div class="main">
-          <span class="eyebrow dot-eyebrow">${e.type === "project" ? "Project pass" : "Event ticket"}</span>
+          <span class="eyebrow dot-eyebrow">${esc(RS.tags[e.tag].one)} ticket</span>
           <h3 class="headline">${esc(e.title)}</h3>
           <dl>
             <div><dt>Name</dt><dd>${esc(r.name)}</dd></div>

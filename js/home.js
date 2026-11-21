@@ -3,48 +3,53 @@
   const RS = window.RS;
   const { esc, $, $$, dateBlock, parseDate, foundEgg, reduceMotion, spotsLeft } = window.RSU;
   const order = ["I", "D", "E", "A", "L", "S"];
-  const tones = { I: "purple", D: "blue", E: "red", A: "purple", L: "blue", S: "red" };
-  const toneHex = { purple: "#7f3286", blue: "#1b478a", red: "#e60048" };
   const now = new Date();
   const upcoming = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
+  /* ---------- Opening animation: ends on its own, or on any click or key ---------- */
+  const root = document.documentElement;
+  if (root.classList.contains("intro")) {
+    const end = () => {
+      root.classList.remove("intro");
+      document.removeEventListener("keydown", end);
+    };
+    $(".intro-cols").addEventListener("animationend", (e) => { if (e.animationName === "introFold") end(); });
+    $(".intro-overlay").addEventListener("click", end);
+    document.addEventListener("keydown", end);
+    setTimeout(end, 3500); // safety net if animations are blocked
+  }
+
   /* ---------- Hero art ---------- */
+  // The ADIS panel (rays and sun) stays still. Only the Round Square circle responds to the pointer.
   const svg = $("#hero-svg");
   const NS = "http://www.w3.org/2000/svg";
   const mini = $("#mini-ideals");
-  const miniDots = order.map((k, i) => {
+  order.forEach((k, i) => {
     const g = document.createElementNS(NS, "g");
     const cx = 320 + (i % 3) * 64, cy = 238 + Math.floor(i / 3) * 70;
-    g.innerHTML = `<circle cx="${cx}" cy="${cy}" r="22" fill="${toneHex[tones[k]]}"/><text x="${cx}" y="${cy + 5}" fill="#fff">${k}</text>`;
-    g.style.transformOrigin = `${cx}px ${cy}px`;
+    g.setAttribute("data-i", k);
+    g.innerHTML = `<circle cx="${cx}" cy="${cy}" r="22" style="fill:var(--ic)"/><text x="${cx}" y="${cy + 5}" style="fill:var(--ic-on)">${k}</text>`;
     mini.appendChild(g);
-    return g;
   });
 
-  // The rays swing together as one fan (clipped to the purple panel) and the Round Square circle
-  // leans toward the pointer. Both ease toward their target so the motion stays smooth.
-  const rays = $$("#rays line");
-  const fan = $("#rays");
   const ball = $("#rs-ball");
   const follow = document.createElementNS(NS, "g");
   ball.parentNode.insertBefore(follow, ball);
   follow.appendChild(ball);
   ball.style.transformBox = "fill-box";
   ball.style.transformOrigin = "center";
-  const target = { a: 0, x: 0, y: 0 }, cur = { a: 0, x: 0, y: 0 };
+  const target = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
   let raf = 0;
   function step() {
     let moving = false;
-    for (const k of ["a", "x", "y"]) {
+    for (const k of ["x", "y"]) {
       cur[k] += (target[k] - cur[k]) * 0.12;
       if (Math.abs(target[k] - cur[k]) > 0.01) moving = true; else cur[k] = target[k];
     }
-    fan.setAttribute("transform", `rotate(${cur.a.toFixed(2)} 96 360)`);
     follow.setAttribute("transform", `translate(${cur.x.toFixed(1)} ${cur.y.toFixed(1)})`);
     raf = moving ? requestAnimationFrame(step) : 0;
   }
   function aim(px, py) {
-    target.a = (px - 0.5) * 12;
     target.x = Math.max(-1, Math.min(1, (px * 480 - 384) / 200)) * 14;
     target.y = Math.max(-1, Math.min(1, (py * 360 - 96) / 200)) * 14;
     if (!raf) raf = requestAnimationFrame(step);
@@ -54,36 +59,19 @@
       const b = svg.getBoundingClientRect();
       aim((e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height);
     });
-    svg.addEventListener("pointerleave", () => { target.a = target.x = target.y = 0; if (!raf) raf = requestAnimationFrame(step); });
+    svg.addEventListener("pointerleave", () => { target.x = target.y = 0; if (!raf) raf = requestAnimationFrame(step); });
   }
   const boing = () => ball.animate(
     [{ transform: "scale(1)" }, { transform: "scale(.7,1.2)" }, { transform: "scale(1.15,.85)" }, { transform: "scale(1)" }],
     { duration: 600, easing: "cubic-bezier(.34,1.56,.64,1)" }
   );
   ball.addEventListener("click", boing);
-
-  // The one orchestrated moment: the sun rises, its rays reach out, the circle drops into its square,
-  // and the six IDEALS land one by one.
-  if (!reduceMotion) {
-    const bounce = "cubic-bezier(.34,1.4,.64,1)";
-    $("#sun").animate([{ transform: "translateY(110px)" }, { transform: "none" }], { duration: 900, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
-    rays.forEach((r, i) => {
-      const len = Math.hypot(r.x2.baseVal.value - 96, r.y2.baseVal.value - 360);
-      r.style.strokeDasharray = len;
-      r.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 700, delay: 500 + i * 90, easing: "ease-out", fill: "backwards" })
-        .onfinish = () => (r.style.strokeDasharray = "");
-    });
-    ball.animate([{ transform: "translateY(-190px)" }, { transform: "none" }], { duration: 900, delay: 900, easing: bounce, fill: "backwards" });
-    miniDots.forEach((d, i) => d.animate([{ transform: "scale(0)" }, { transform: "scale(1)" }], { duration: 450, delay: 1400 + i * 110, easing: bounce, fill: "backwards" }));
-  }
   ball.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); boing(); } });
 
   // Egg: click the rising sun three times for a sunrise.
   const sun = $("#sun");
-  const core = $("#sun-core");
   let sunClicks = 0, sunTimer, sunriseTimer;
   function pokeSun() {
-    core.animate([{ r: "66px" }, { r: "76px" }, { r: "66px" }], { duration: 400, easing: "ease-out" });
     sunClicks++;
     clearTimeout(sunTimer);
     sunTimer = setTimeout(() => (sunClicks = 0), 1200);
@@ -102,7 +90,7 @@
   let filter = "all";
   const idealsEl = $("#ideals");
   idealsEl.innerHTML = order.map((k) => `
-    <button class="ideal" data-k="${k}" data-tone="${tones[k]}" aria-pressed="false">
+    <button class="ideal" data-k="${k}" data-i="${k}" aria-pressed="false">
       ${k === RS.config.idealOfFortnight ? '<span class="focus-badge">Now</span>' : ""}
       <span class="ring" aria-hidden="true">${k}</span>
       <span class="name">${esc(RS.ideals[k].name)}</span>
@@ -111,6 +99,7 @@
   const detail = $("#ideal-detail");
   function showIdeal(k) {
     const isNow = k === RS.config.idealOfFortnight;
+    detail.dataset.i = k;
     detail.innerHTML = `
       <span class="focus-dot" aria-hidden="true">${k}</span>
       <div>
@@ -168,7 +157,7 @@
         </div>
       </div>
       <div class="band" aria-hidden="true"><span class="b-purple"></span><span class="b-blue"></span><span class="b-red"></span><span class="b-gold"></span></div>
-      <section class="focus">
+      <section class="focus" data-i="${n.ideal}">
         <span class="focus-dot" aria-hidden="true">${n.ideal}</span>
         <div><span class="eyebrow dot-eyebrow">Ideal of the fortnight</span><p class="title">${esc(ideal.name)}</p><p>${esc(ideal.blurb)}</p></div>
       </section>
@@ -235,7 +224,7 @@
   /* ---------- RS Bulletin: highlights ---------- */
   const filters = $("#hl-filters");
   filters.innerHTML = `<button class="chip plain" data-k="all" aria-pressed="true">All</button>` +
-    order.map((k) => `<button class="chip" data-k="${k}" aria-pressed="false"><b>${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
+    order.map((k) => `<button class="chip" data-k="${k}" aria-pressed="false"><b data-i="${k}">${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
   filters.addEventListener("click", (e) => {
     const c = e.target.closest(".chip");
     if (c) setFilter(c.dataset.k === filter && c.dataset.k !== "all" ? "all" : c.dataset.k);
@@ -245,7 +234,7 @@
   function renderHighlights() {
     const list = RS.highlights.filter((h) => filter === "all" || h.ideal === filter);
     hlEl.innerHTML = list.length ? list.map((h, i) => `
-      <article class="hl ${h.tone === "rs" ? "rs" : ""}">
+      <article class="hl" data-i="${h.ideal}">
         <span class="letter" aria-hidden="true">${h.ideal}</span>
         <span class="caption">${esc(RS.ideals[h.ideal].name)}, ${parseDate(h.date).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}</span>
         <h3>${esc(h.title)}</h3>

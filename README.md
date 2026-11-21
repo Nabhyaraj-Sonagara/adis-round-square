@@ -18,7 +18,9 @@ Everything is in **`js/data.js`**. All of it is sample content right now: replac
 
 - `config.idealOfFortnight` sets the IDEAL shown as "Now".
 - `newsletters` holds the issues, newest first. Set `pdf` to a file path to show a download button.
-- `highlights`, `events` and `committee` work the same way. Events with a past date disappear automatically.
+- `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filter on the Register page. Events with a past date disappear automatically.
+- `committee`: each member is in `students` (the student committee) or `teachers`.
+- Each IDEAL has one fixed colour, set in `css/styles.css` under "One colour per IDEAL".
 
 ## Collecting registrations
 
