@@ -41,7 +41,7 @@
             <span class="eyebrow dot-eyebrow ${m.group === "staff" ? "blue" : m.group === "core" ? "adis" : ""} role">${esc(m.role)}</span>
             <span class="name">${esc(m.name)}</span>
             <span class="caption">${m.group === "staff" || m.group === "honorary" ? esc(m.grade) : `Grade ${esc(m.grade)}`}, ${esc(RS.ideals[m.ideal].name)}</span>
-            <span class="flip-hint" aria-hidden="true">↻ Flip for contact</span>
+            <span class="flip-hint" aria-hidden="true">↻</span>
           </button>
           <div class="face back" inert>
             <span class="eyebrow">${esc(m.role)}</span>

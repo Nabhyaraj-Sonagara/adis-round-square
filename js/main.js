@@ -182,7 +182,7 @@
       kPos = 0;
       document.body.classList.toggle("round-mode");
       store.set("rs-round", document.body.classList.contains("round-mode"));
-      if (document.body.classList.contains("round-mode")) foundEgg("konami"); else toast("Back to square one.", "□");
+      if (document.body.classList.contains("round-mode")) foundEgg("konami"); else toast("Round mode off. Back to square one.", "★");
     }
     if (typing || key.length !== 1) return;
     typed = (typed + key).slice(-6);

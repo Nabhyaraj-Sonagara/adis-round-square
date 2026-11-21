@@ -160,7 +160,6 @@ section.block { padding: var(--space-16) 0; }
 .hero-art .sun { cursor: pointer; outline: none; }
 .hero-art .sun:focus-visible circle:first-child, .hero-art .rs-ball:focus-visible { stroke: var(--focus); stroke-width: 4; }
 .hero-art .rs-ball { cursor: pointer; }
-.hero-hint { margin-top: var(--space-3); text-align: right; font-family: var(--font-sans); font-size: 13px; color: var(--ink-muted); letter-spacing: .02em; }
 @media (max-width: 860px) {
   .hero .wrap { grid-template-columns: 1fr; min-height: 0; }
   .hero-art { max-width: 520px; }
@@ -224,7 +223,7 @@ body.sunrise .motto { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
 .paper-stage { perspective: 1800px; }
 .paper {
-  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-pop); transform-origin: left center;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-pop); transform-origin: left center; border-radius: var(--radius-none); overflow: hidden;
   transition: transform .45s cubic-bezier(.6,.05,.3,1), opacity .45s;
 }
 .paper.turning { transform: rotateY(-70deg); opacity: 0; }
@@ -238,7 +237,7 @@ body.sunrise .motto { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .focus-dot { flex: none; width: 56px; height: 56px; border-radius: var(--radius-full); background: var(--rs-red); color: var(--on-brand); display: grid; place-items: center; font-size: 30px; font-weight: 600; }
 .focus p { margin: 0; }
 .focus .title { margin: var(--space-1) 0 var(--space-1); }
-.photo { aspect-ratio: 3 / 2; background: var(--surface-sunk); position: relative; overflow: hidden; border: var(--border-frame) solid var(--rs-gold); }
+.photo { border-radius: var(--radius-none); aspect-ratio: 3 / 2; background: var(--surface-sunk); position: relative; overflow: hidden; border: var(--border-frame) solid var(--rs-gold); }
 .photo svg { width: 100%; height: 100%; display: block; }
 .story h3 { margin: var(--space-2) 0 var(--space-3); }
 .story p { margin: 0 0 var(--space-3); }
@@ -341,7 +340,8 @@ button.face { text-align: left; cursor: pointer; font: inherit; color: inherit; 
 .avatar::after { content: attr(data-ideal); position: absolute; right: -6px; bottom: -4px; width: 30px; height: 30px; border-radius: var(--radius-sm); background: var(--rs-gold); color: var(--ink); display: grid; place-items: center; font: 700 14px/1 var(--font-sans); border: 3px solid var(--surface); }
 .face .role { margin: 0 0 var(--space-1); }
 .face .name { font-size: 22px; line-height: 28px; font-weight: 600; margin: 0; }
-.face .flip-hint { margin-top: auto; padding-top: var(--space-4); font: 600 12px/16px var(--font-sans); letter-spacing: .06em; color: var(--ink-muted); display: flex; align-items: center; gap: var(--space-2); }
+.face .flip-hint { position: absolute; right: var(--space-4); bottom: var(--space-3); font: 600 20px/1 var(--font-sans); color: var(--line-strong); transition: transform .4s var(--ease-bounce), color .2s; }
+.face.front:hover .flip-hint { color: var(--adis-purple); transform: rotate(180deg); }
 .face.back .eyebrow { color: var(--rs-gold); }
 .face.back .fact { font-style: italic; margin: var(--space-2) 0 var(--space-4); color: #e6e2ec; font-size: 16px; line-height: 24px; }
 .contact-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin-top: var(--space-2); min-width: 0; }
@@ -473,13 +473,13 @@ button.face { text-align: left; cursor: pointer; font: inherit; color: inherit; 
 .rain-letter { position: absolute; top: -90px; font: 600 64px/1 var(--font-serif); will-change: transform; }
 .rolling-mark { position: fixed; bottom: 24px; left: -130px; width: 110px; height: 110px; z-index: 160; pointer-events: none; }
 
-/* Round mode (Konami code): the square goes round */
-body.round-mode .btn, body.round-mode .face, body.round-mode .hl, body.round-mode .paper, body.round-mode .pick label,
-body.round-mode .issue-tab, body.round-mode .coming-up, body.round-mode .focus, body.round-mode .ideal-detail,
-body.round-mode .summary, body.round-mode .field input, body.round-mode .field select, body.round-mode .field textarea,
-body.round-mode .search input, body.round-mode .nav a, body.round-mode .photo, body.round-mode .contact-strip { border-radius: 32px !important; }
-body.round-mode .date-block, body.round-mode .type-tag { border-radius: var(--radius-full) !important; }
+/* Round mode (Konami code): the square goes round. Every corner in the system reads these two tokens,
+   so overriding them rounds the whole site evenly. Logos are never altered. */
+body.round-mode { --radius-sm: 18px; --radius-none: 18px; }
 body.round-mode .band { border-radius: var(--radius-full); overflow: hidden; }
+body.round-mode .hero-art .shape { rx: 18px; }
+body.round-mode .hero-art .shape.inner { rx: 13px; }
+.face, .pick label, .paper, .photo, .btn, .summary, .ticket { transition-property: border-radius, background, border-color, transform, box-shadow; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }

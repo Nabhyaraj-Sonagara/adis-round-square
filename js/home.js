@@ -21,26 +21,40 @@
     return g;
   });
 
-  // Rays fan out and the Round Square circle watches the pointer.
+  // The rays swing together as one fan (clipped to the purple panel) and the Round Square circle
+  // leans toward the pointer. Both ease toward their target so the motion stays smooth.
   const rays = $$("#rays line");
+  const fan = $("#rays");
   const ball = $("#rs-ball");
   const follow = document.createElementNS(NS, "g");
   ball.parentNode.insertBefore(follow, ball);
   follow.appendChild(ball);
   ball.style.transformBox = "fill-box";
   ball.style.transformOrigin = "center";
+  const target = { a: 0, x: 0, y: 0 }, cur = { a: 0, x: 0, y: 0 };
+  let raf = 0;
+  function step() {
+    let moving = false;
+    for (const k of ["a", "x", "y"]) {
+      cur[k] += (target[k] - cur[k]) * 0.12;
+      if (Math.abs(target[k] - cur[k]) > 0.01) moving = true; else cur[k] = target[k];
+    }
+    fan.setAttribute("transform", `rotate(${cur.a.toFixed(2)} 96 360)`);
+    follow.setAttribute("transform", `translate(${cur.x.toFixed(1)} ${cur.y.toFixed(1)})`);
+    raf = moving ? requestAnimationFrame(step) : 0;
+  }
   function aim(px, py) {
-    rays.forEach((r, i) => r.setAttribute("transform", `rotate(${(px - 0.5) * (8 + i * 5)} 96 360)`));
-    const dx = Math.max(-1, Math.min(1, (px * 480 - 384) / 200)) * 18;
-    const dy = Math.max(-1, Math.min(1, (py * 360 - 96) / 200)) * 18;
-    follow.setAttribute("transform", `translate(${dx.toFixed(1)} ${dy.toFixed(1)})`);
+    target.a = (px - 0.5) * 12;
+    target.x = Math.max(-1, Math.min(1, (px * 480 - 384) / 200)) * 14;
+    target.y = Math.max(-1, Math.min(1, (py * 360 - 96) / 200)) * 14;
+    if (!raf) raf = requestAnimationFrame(step);
   }
   if (!reduceMotion) {
     svg.addEventListener("pointermove", (e) => {
       const b = svg.getBoundingClientRect();
       aim((e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height);
     });
-    svg.addEventListener("pointerleave", () => aim(0.5, 0.27));
+    svg.addEventListener("pointerleave", () => { target.a = target.x = target.y = 0; if (!raf) raf = requestAnimationFrame(step); });
   }
   const boing = () => ball.animate(
     [{ transform: "scale(1)" }, { transform: "scale(.7,1.2)" }, { transform: "scale(1.15,.85)" }, { transform: "scale(1)" }],

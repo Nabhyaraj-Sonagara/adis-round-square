@@ -29,31 +29,31 @@
         <div class="hero-art">
           <svg id="hero-svg" viewBox="0 0 480 360" role="img" aria-label="The ADIS rising sun meets the Round Square circle">
             <!-- ADIS: purple slab with the crest's rays and rising sun -->
-            <rect x="0" y="0" width="192" height="360" fill="#7f3286"/>
-            <g id="rays">
+            <rect class="shape" x="0" y="0" width="192" height="360" fill="#7f3286"/>
+            <clipPath id="slab-clip"><rect class="shape" x="0" y="0" width="192" height="360"/></clipPath>
+            <g clip-path="url(#slab-clip)"><g id="rays">
               <line class="ray" x1="96" y1="360" x2="-10" y2="60"/>
               <line class="ray" x1="96" y1="360" x2="44" y2="0"/>
               <line class="ray" x1="96" y1="360" x2="148" y2="0"/>
               <line class="ray" x1="96" y1="360" x2="202" y2="60"/>
-            </g>
+            </g></g>
             <g class="sun" id="sun" tabindex="0" role="button" aria-label="The rising sun">
               <circle cx="96" cy="360" r="84" fill="#ffffff"/>
               <circle id="sun-core" cx="96" cy="360" r="66" fill="#7f3286"/>
             </g>
             <!-- ADIS blue -->
-            <rect x="192" y="120" width="96" height="240" fill="#1b478a"/>
+            <rect class="shape" x="192" y="120" width="96" height="240" fill="#1b478a"/>
             <!-- Round Square: red square in a gold frame, with its circle -->
-            <rect x="288" y="0" width="192" height="192" fill="#d59600"/>
-            <rect x="294" y="6" width="180" height="180" fill="#e60048"/>
-            <clipPath id="sq-clip"><rect x="294" y="6" width="180" height="180"/></clipPath>
+            <rect class="shape" x="288" y="0" width="192" height="192" fill="#d59600"/>
+            <rect class="shape inner" x="294" y="6" width="180" height="180" fill="#e60048"/>
+            <clipPath id="sq-clip"><rect class="shape inner" x="294" y="6" width="180" height="180"/></clipPath>
             <g clip-path="url(#sq-clip)">
               <circle class="rs-ball" id="rs-ball" cx="384" cy="96" r="64" fill="#ffffff" tabindex="0" role="button" aria-label="The Round Square circle"/>
             </g>
             <!-- Gold tint relief with the six IDEALS -->
-            <rect x="288" y="192" width="192" height="168" fill="#fbf1d9"/>
+            <rect class="shape" x="288" y="192" width="192" height="168" fill="#fbf1d9"/>
             <g id="mini-ideals" font-family="Barlow, Arial, sans-serif" font-weight="700" font-size="15" text-anchor="middle"></g>
           </svg>
-          <p class="hero-hint">Move your pointer across the picture. The sun likes to be tapped.</p>
         </div>
       </div>
       <div class="motto" aria-live="polite">Plus est en vous<small>There is more in you · Kurt Hahn</small></div>
@@ -64,7 +64,6 @@
       <div class="wrap">
         <div class="section-head">
           <h2 id="ideals-title" class="headline">The six IDEALS</h2>
-          <p class="caption" style="margin:0">Pick one to read what it means and filter the highlights below.</p>
         </div>
         <div class="ideals" id="ideals"></div>
         <div class="ideal-detail" id="ideal-detail" aria-live="polite"></div>
