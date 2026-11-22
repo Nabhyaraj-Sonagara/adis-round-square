@@ -1,7 +1,7 @@
 /* Register: three-step form, 3-2-1 countdown, printed ticket, calendar file and "My registrations". */
 (function () {
   const RS = window.RS;
-  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, reduceMotion } = window.RSU;
+  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, eventCode, reduceMotion } = window.RSU;
   const form = $("#reg-form");
   const events = upcomingEvents();
   const byId = (id) => RS.events.find((e) => e.id === id);
@@ -37,7 +37,7 @@
             <span class="avail">${avail}</span>
           </label>
         </div>`;
-    }).join("") || `<p class="empty">Nothing here right now. New events go up every fortnight.</p>`;
+    }).join("") || `<p class="empty">Nothing here right now. Check back soon.</p>`;
   }
   $("#type-filter").innerHTML = `<button type="button" class="chip plain" data-t="all" aria-pressed="true">Everything</button>` +
     Object.entries(RS.tags).map(([k, t]) => `<button type="button" class="chip plain" data-t="${k}" aria-pressed="false">${esc(t.many)}</button>`).join("");
@@ -141,8 +141,7 @@
   form.addEventListener("input", (e) => e.target.closest(".field")?.classList.remove("invalid"));
   form.addEventListener("change", (e) => e.target.closest(".field")?.classList.remove("invalid"));
 
-  /* ---------- Submit: a 3-2-1 launch, then the ticket prints ---------- */
-  const code = () => "RS-" + Array.from({ length: 5 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
+  /* ---------- Submit: a 3-2-1 countdown, then the ticket prints ---------- */
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
   form.addEventListener("submit", async (e) => {
@@ -153,7 +152,7 @@
     if (btn.disabled) return;
     btn.disabled = true;
     const reg = {
-      code: code(),
+      code: eventCode(byId(picked)),
       eventId: picked,
       eventTitle: byId(picked).title,
       name: $("#f-name").value.trim(),
@@ -191,13 +190,15 @@
 
   function renderTicket(r, sent) {
     const e = byId(r.eventId);
-    const bars = [...r.code].flatMap((ch) => { const n = ch.charCodeAt(0); return [1 + (n % 3), 1 + ((n >> 2) % 3)]; });
+    // A meeting code only when the host has shared one; otherwise the event code.
+    const shown = e.meetingCode || r.code, kind = e.meetingCode ? "meeting code" : "event code";
+    const bars = [...shown].flatMap((ch) => { const n = ch.charCodeAt(0); return [1 + (n % 3), 1 + ((n >> 2) % 3)]; });
     const mail = `<a href="mailto:${esc(RS.config.committeeEmail)}?subject=${encodeURIComponent(`Registration ${r.code}: ${e.title}`)}">${esc(RS.config.committeeEmail)}</a>`;
     const note = sent === true
       ? `You're in. The committee has your registration. Questions? Write to ${mail}.`
       : sent === false
-        ? `Your ticket is saved on this device, but it didn't reach the committee. Email your meeting code to ${mail} to confirm your place.`
-        : `You're in. Keep your meeting code and show it at the event. Questions? Write to ${mail}.`;
+        ? `Your ticket is saved on this device, but it didn't reach the committee. Email your ${kind} to ${mail} to confirm your place.`
+        : `You're in. Keep your ${kind} and show it at the event. Questions? Write to ${mail}.`;
     $("#ticket").innerHTML = `
       <div class="ticket-slot" aria-hidden="true"></div>
       <div class="ticket-feed">
@@ -214,8 +215,8 @@
             </dl>
           </div>
           <div class="stub">
-            <span class="label">Meeting code</span>
-            <span class="code">${esc(r.code)}</span>
+            <span class="label">${e.meetingCode ? "Meeting code" : "Event code"}</span>
+            <span class="code">${esc(shown)}</span>
             <span class="barcode" aria-hidden="true">${bars.map((w, i) => `<i style="width:${w}px;opacity:${i % 3 ? 1 : .6}"></i>`).join("")}</span>
           </div>
         </div>
@@ -238,9 +239,9 @@
     const icsText = (s) => s.replace(/([,;\\])/g, "\\$1");
     const ics = [
       "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ADIS Round Square//Register//EN", "BEGIN:VEVENT",
-      `UID:${lastReg.code}@adis-roundsquare`, `DTSTAMP:${f(new Date())}`, ...span,
+      `UID:${lastReg.code}-${Date.parse(lastReg.ts)}@adis-roundsquare`, `DTSTAMP:${f(new Date())}`, ...span,
       `SUMMARY:${icsText(e.title)}`, `LOCATION:${icsText(`${e.host}, ${e.place}`)}`,
-      `DESCRIPTION:Meeting code ${lastReg.code}. ${icsText(e.body)}`, "END:VEVENT", "END:VCALENDAR",
+      `DESCRIPTION:${e.meetingCode ? `Meeting code ${icsText(e.meetingCode)}` : `Event code ${lastReg.code}`}. ${icsText(e.body)}`, "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));

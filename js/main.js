@@ -37,6 +37,12 @@
     return RS.events.filter((e) => (e.date.length > 10 ? parseDate(e.date) : dayEnd(e.ends || e.date)) > now)
       .sort((a, b) => parseDate(a.date) - parseDate(b.date));
   };
+  // Event code from the type and the event's order within that type, by date: COLAB001, POST004.
+  const codePrefix = { lab: "LAB", postcard: "POST", collab: "COLAB", conference: "CONF" };
+  const eventCode = (ev) => {
+    const same = RS.events.filter((e) => e.tag === ev.tag).sort((a, b) => parseDate(a.date) - parseDate(b.date) || a.id.localeCompare(b.id));
+    return `${codePrefix[ev.tag] || ev.tag.toUpperCase()}${String(same.indexOf(ev) + 1).padStart(3, "0")}`;
+  };
   const shortDate = (iso) => { const d = parseDate(iso); return `${d.getDate()} ${months[d.getMonth()]}`; };
   // One line that says when: "25 Nov, 14:00", "Open until 26 Nov" or "10–14 February 2027".
   const whenText = (ev) => ev.when || (ev.dateLabel ? `${ev.dateLabel} ${shortDate(ev.date)}` : `${shortDate(ev.date)}${fmtTime(ev.date) ? `, ${fmtTime(ev.date)}` : ""}`);
@@ -223,11 +229,11 @@
 
   /* ---------- Console note for the curious ---------- */
   console.log(
-    "%c ROUND %c SQUARE %c\nYou opened the inspector, so you're curious. That's the Adventure IDEAL.\nThe committee needs a tech lead: write to " + RS.config.committeeEmail + "\nPS: there are six easter eggs on this site. Hint: ↑↑↓↓←→←→BA",
+    "%c ROUND %c SQUARE %c\nYou opened the inspector, so you're curious. That's the Adventure IDEAL.\nQuestions about Round Square at ADIS? Write to " + RS.config.committeeEmail + "\nPS: there are six easter eggs on this site. Hint: ↑↑↓↓←→←→BA",
     "background:#e60048;color:#fff;font:600 14px sans-serif;padding:4px 6px",
     "background:#d59600;color:#1f1b2e;font:600 14px sans-serif;padding:4px 6px",
     "color:#7f3286;font:13px Georgia,serif"
   );
 
-  window.RSU = { esc, $, $$, store, dateBlock, fmtLong, fmtTime, parseDate, months, toast, confetti, foundEgg, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, reduceMotion };
+  window.RSU = { esc, $, $$, store, dateBlock, fmtLong, fmtTime, parseDate, months, toast, confetti, foundEgg, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, eventCode, reduceMotion };
 })();

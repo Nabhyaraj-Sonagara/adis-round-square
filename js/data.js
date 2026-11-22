@@ -1,7 +1,7 @@
 /*
  * ADIS × Round Square — site content.
  * Edit this file to update the newsletter, bulletin, events and committee.
- * Everything below is SAMPLE content: replace names, contacts and stories before going live.
+ * Events and highlights come from Round Square postcards, posters and Hub pages.
  */
 window.RS = {
   config: {
@@ -9,15 +9,15 @@ window.RS = {
     // (shown under "My registrations"). Paste a Formspree / Google Apps Script URL
     // that accepts a JSON POST to collect them centrally.
     registrationEndpoint: "",
-    committeeEmail: "roundsquare@adis.example",
+    committeeEmail: "kumar.abhishek@adaniinternational.edu.in",
     // The IDEAL in focus this fortnight (one of the keys in `ideals`).
-    idealOfFortnight: "D",
+    idealOfFortnight: "I",
   },
 
   ideals: {
     I: { name: "Internationalism", blurb: "Seeing the world through other people's eyes, and making friends across borders." },
     D: { name: "Democracy", blurb: "Every voice counts. We debate, listen, vote and own the outcome together." },
-    E: { name: "Environmentalism", blurb: "Caring for the planet we share, from our campus garden to the Sabarmati riverfront." },
+    E: { name: "Environmentalism", blurb: "Caring for the planet we share, starting with the choices we make every day." },
     A: { name: "Adventure", blurb: "Stepping outside comfort zones, on treks, expeditions and new challenges." },
     L: { name: "Leadership", blurb: "Leading by example, and helping others find the leader in themselves." },
     S: { name: "Service", blurb: "Doing real work for real people, and learning from those we serve." },
@@ -25,50 +25,35 @@ window.RS = {
 
   newsletters: [
     {
-      id: "02",
-      dates: "16–29 November 2026",
-      ideal: "D",
-      pdf: "", // e.g. "newsletters/common-ground-02.pdf"
-      intro: "This fortnight the student council ran its first open budget vote, and Grade 9 joined a Round Square Baraza with schools from four continents.",
-      lead: {
-        title: "Students vote on how to spend the service fund",
-        body: "Over 300 students voted in the first open budget ballot. The winning proposal, a reading corner for the neighbourhood anganwadi, gets 60% of the term's service fund. Grade 11 counted every ballot by hand in the library on Friday afternoon.",
-        caption: "Photo: Grade 11 counting ballots in the ADIS library, 20 November",
-      },
-      network: [
-        { title: "Baraza: what does fairness look like?", body: "Twelve ADIS students met peers from Kenya, Peru and Canada on Zoom to compare how their schools make rules.", school: "Round Square Baraza" },
-        { title: "A student parliament in Cape Town", body: "A partner school shared how its student parliament writes its own constitution, one clause at a time.", school: "From the network" },
-      ],
-      adis: { title: "Model UN club opens to Grade 8", body: "After a petition signed by 84 students, Model UN will welcome Grade 8 from January. Sign-ups open on the Register page." },
-      quote: { text: "I didn't think my one vote mattered until we counted them all.", by: "Grade 10 student, after the budget vote" },
-    },
-    {
       id: "01",
-      dates: "2–15 November 2026",
-      ideal: "E",
-      pdf: "",
-      intro: "Our first issue! The Round Square committee launched with a riverfront clean-up and a pledge to cut single-use plastic on campus.",
+      dates: "November 2026",
+      ideal: "I",
+      pdf: "", // e.g. "newsletters/common-ground-01.pdf"
+      intro: "Round Square at ADIS this month: six Zoom Postcards with schools from Ottawa to Hong Kong, weekly English Labs, and two conferences open for 2027.",
       lead: {
-        title: "180 kilos of waste lifted from the riverfront",
-        body: "Sixty students from Grades 7–12 spent a Saturday morning at the Sabarmati riverfront, sorting what they collected into recyclable and non-recyclable piles. The recyclables went to a local collective.",
-        caption: "Photo: Grade 8 at the Sabarmati riverfront, 8 November",
+        title: "Two Round Square conferences open to ADIS students",
+        body: "Daly College in Indore hosts ORKA: Energy, Strength, Power from 10 to 14 February 2027 for Grades 6 and 7. Sunbeam Suncity in Varanasi hosts Across and Beyond: One World, One Heart from 26 to 30 March 2027 for Grades 7 to 9. Students board at the host school for both. If you're interested, see Mr. Kumar Abhishek in the Middle Block, 2nd floor staff room.",
+        caption: "",
       },
       network: [
-        { title: "A forest planted by six countries", body: "Students from six Round Square schools each planted saplings on the same day and logged them on a shared map.", school: "From the network" },
-        { title: "Postcard: rethinking waste", body: "A Round Square Postcard brought 40 schools together online to share one change each had made.", school: "Round Square Postcard" },
+        { title: "What's on the menu?", body: "Bloom KKCA Academy is collecting photos of a typical school lunch from as many Round Square schools as possible, to compare food traditions, nutrition and sustainability.", school: "Bloom KKCA Academy" },
+        { title: "A holiday card from home", body: "Malvern College Hong Kong is gathering hand-made and digital cards for local holidays, written in mother tongues with English translations, on one shared Padlet.", school: "Malvern College Hong Kong" },
       ],
-      adis: { title: "The canteen goes steel", body: "From December, the canteen serves in steel plates and cups. The committee's plastic audit counted 1,200 disposable items a week." },
-      quote: { text: "We came for an hour. We stayed until lunch.", by: "Grade 8 volunteer at the riverfront" },
+      adis: { title: "Zoom Postcards, run by students", body: "Samar Agshikar (8C) and Advit Sah (7B) coordinate ADIS sign-ups for Zoom Postcards. This term's calls are hosted by schools in Ottawa, Hong Kong, Mumbai, Bengaluru, Buenos Aires and New York." },
+      quote: { text: "There is more in us than we know. If we can be made to see it, perhaps for the rest of our lives we will be unwilling to settle for less.", by: "Kurt Hahn, whose ideas founded Round Square" },
     },
   ],
 
+  // Recent Round Square sessions, from the archived postcards and lab posters.
   highlights: [
-    { title: "Budget vote: the anganwadi reading corner wins", ideal: "D", date: "2026-11-20", body: "60% of the service fund goes to a reading corner chosen by the whole school." },
-    { title: "Riverfront clean-up lifts 180 kg of waste", ideal: "E", date: "2026-11-08", body: "Sixty students, one Saturday, a lot of gloves." },
-    { title: "Baraza with Kenya, Peru and Canada", ideal: "I", date: "2026-11-18", body: "Twelve students compared how their schools make rules." },
-    { title: "Grade 10 summits Kalsubai", ideal: "A", date: "2026-10-25", body: "The highest peak in Maharashtra, before sunrise." },
-    { title: "Peer tutors log 400 hours", ideal: "S", date: "2026-11-14", body: "Senior students now tutor every weekday after school." },
-    { title: "New student committee takes office", ideal: "L", date: "2026-11-03", body: "Anushka Bhandari is President and Shanaya Shelat Vice President of a 26-member committee." },
+    { title: "RS Geography Labs", ideal: "I", date: "2026-11-19", body: "Four online sessions for students aged 14 and over: population, forces of nature, rivers, and tourism as boon or burden." },
+    { title: "RS English Labs: food and culture", ideal: "I", date: "2026-11-19", body: "Week two of conversation practice with Round Square peers, after home, places and community on 12 November." },
+    { title: "The Mental Courtroom", ideal: "D", date: "2026-11-18", body: "A Zoom Postcard from The Emerald Heights International School on how evidence and perspective shape what we judge fair or unfair." },
+    { title: "When disaster strikes: are we ready?", ideal: "S", date: "2026-11-18", body: "A Zoom Postcard from First Steps School on preparedness, resilience and supporting communities before, during and after a disaster." },
+    { title: "Small steps, big impact", ideal: "E", date: "2026-11-11", body: "A Zoom Postcard from Bangalore International School on everyday choices for a sustainable future." },
+    { title: "The Parasocial Paradox", ideal: "I", date: "2026-11-11", body: "A Zoom Postcard from GNMS on the one-sided bonds we form with online creators." },
+    { title: "Inspirational women in sport", ideal: "L", date: "2026-11-04", body: "A Zoom Postcard from St. Cyprian's on women breaking barriers in sport." },
+    { title: "The Digital Trap", ideal: "D", date: "2026-11-04", body: "A Zoom Postcard from Michael Ham Memorial College on how social media affects friendships, learning and well-being." },
   ],
 
   // `tag` decides the filter on the Register page (keys in `tags` below). `date` in ISO, local time.
@@ -79,7 +64,9 @@ window.RS = {
     conference: { one: "Conference", many: "Conferences" },
   },
   // Optional fields: `ends` (last day), `when` (date in words), `dateLabel` (what `date` marks),
-  // `deadline` (last day to sign up), `prep`, `contact`, and `spots` + `taken` for a capped event.
+  // `deadline` (last day to sign up), `prep`, `contact`, `spots` + `taken` for a capped event,
+  // and `meetingCode` once the host shares a Zoom or Google Meet ID. Without one, tickets show
+  // an event code made from the type and order, such as COLAB001.
   events: [
     { id: "facts-feed", tag: "postcard", title: "Facts behind the feed: looking beyond headlines", ideal: "L", date: "2026-11-25T14:00", host: "Sarala Birla Academy", place: "Zoom", grades: "Grades 11–12", deadline: "2026-11-17",
       body: "Algorithms flash headlines that shape what we think. This call is about pausing, questioning the context and tracing the facts before we share.",

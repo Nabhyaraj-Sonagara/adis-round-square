@@ -14,11 +14,11 @@ Open the folder with any static web server, for example `python3 -m http.server`
 
 ## Edit the content
 
-Everything is in **`js/data.js`**. The committee and events are real; the newsletter issues and highlights are still sample content.
+Everything is in **`js/data.js`**. Events, highlights and the newsletter come from Round Square postcards, posters and Hub pages; nothing is invented.
 
 - `config.idealOfFortnight` sets the IDEAL shown as "Now".
 - `newsletters` holds the issues, newest first. Set `pdf` to a file path to show a download button.
-- `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filters on the Bulletin and Register page, plus `host`, `place`, `grades` and `body`. Optional: `deadline` (sign-ups close after that day), `dateLabel` (what the date means, such as "Open until"), `when` and `ends` for multi-day events, `prep`, `contact`, and `spots` + `taken` to cap places. Events disappear automatically once they are over.
+- `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filters on the Bulletin and Register page, plus `host`, `place`, `grades` and `body`. Optional: `deadline` (sign-ups close after that day), `dateLabel` (what the date means, such as "Open until"), `when` and `ends` for multi-day events, `prep`, `contact`, `spots` + `taken` to cap places, and `meetingCode` once a host shares a Zoom or Google Meet ID. Without it, tickets show an event code from the type and order, such as `COLAB001`. Events disappear automatically once they are over.
 - `committee`: each member is in `students` (the student committee) or `teachers`.
 - Each IDEAL has one fixed colour, set in `css/styles.css` under "One colour per IDEAL".
 - The ASCII drawings (the globe on the home page, the circle in the square on Committee, the sun on Register) are canvas shaders in `js/ascii.js`.

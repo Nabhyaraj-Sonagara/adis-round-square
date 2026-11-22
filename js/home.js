@@ -177,7 +177,7 @@
         <div class="col">
           <article class="story">
             <div class="photo">${photoArt(+n.id)}</div>
-            <p class="caption" style="margin:8px 0 24px">${esc(n.lead.caption)}</p>
+            ${n.lead.caption ? `<p class="caption" style="margin:8px 0 24px">${esc(n.lead.caption)}</p>` : `<div style="height:24px"></div>`}
             <span class="label">Lead story</span>
             <h3 class="headline">${esc(n.lead.title)}</h3>
             <p>${esc(n.lead.body)}</p>
@@ -194,7 +194,7 @@
           </article>
           <aside class="coming-up">
             <h3 class="title">Coming up</h3>
-            <ul class="events">${upcoming.slice(0, 3).map((e, j) => `
+            <ul class="events">${upcoming.filter((e) => !isClosed(e)).slice(0, 3).map((e, j) => `
               <li>${dateBlock(e.date, j % 2 === 1)}<div><h4>${esc(e.title)}</h4><p class="caption">${esc(whenText(e))}</p></div></li>`).join("")}
             </ul>
             <a class="btn primary" href="register.html" style="margin-top:16px">Register</a>
@@ -207,7 +207,7 @@
       </div>
       <div class="paper-foot">
         <span class="caption">Common Ground, issue ${esc(n.id)}</span>
-        ${n.pdf ? `<a class="btn secondary" href="${esc(n.pdf)}" download>Download the PDF</a>` : `<span class="caption">Printed copies on the notice boards</span>`}
+        ${n.pdf ? `<a class="btn secondary" href="${esc(n.pdf)}" download>Download the PDF</a>` : ""}
       </div>`;
   }
 
