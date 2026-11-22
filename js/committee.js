@@ -34,18 +34,21 @@
       m.email && `<span class="contact-row"><a href="mailto:${esc(m.email)}">${esc(m.email)}</a><button class="copy-btn" data-copy="${esc(m.email)}">Copy</button></span>`,
       m.phone && `<span class="contact-row"><a href="tel:${esc(m.phone.replace(/\s/g, ""))}">${esc(m.phone)}</a><button class="copy-btn" data-copy="${esc(m.phone)}">Copy</button></span>`,
     ].filter(Boolean).join("") || `<span class="caption">Reach the whole committee at <a href="mailto:${esc(RS.config.committeeEmail)}">${esc(RS.config.committeeEmail)}</a></span>`;
+    // Without an IDEAL, the avatar just takes the next brand colour.
+    const colour = m.ideal || ["D", "I", "A", "E"][i % 4];
+    const grade = m.grade ? (m.group === "students" ? `Grade ${esc(m.grade)}` : esc(m.grade)) : "";
     return `
-      <li class="${animate ? "in" : ""} ${extra}" style="animation-delay:${i * 40}ms">
-        <span class="avatar" data-i="${m.ideal}" aria-hidden="true">${esc(initials(m.name))}</span>
+      <li class="${animate ? "in" : ""} ${extra}" style="animation-delay:${Math.min(i, 12) * 40}ms">
+        <span class="avatar" data-i="${colour}" aria-hidden="true">${esc(initials(m.name))}</span>
         <span class="who"><strong>${esc(m.name)}</strong><span>${esc(m.role)}</span></span>
-        <span class="grade"><b>${m.group === "students" ? `Grade ${esc(m.grade)}` : esc(m.grade)}</b>${esc(RS.ideals[m.ideal].name)}</span>
+        <span class="grade">${grade ? `<b>${grade}</b>` : ""}${m.ideal ? esc(RS.ideals[m.ideal].name) : ""}</span>
         <span class="contact">${contact}</span>
       </li>`;
   }
 
   function matches(m) {
     if (!query) return true;
-    const hay = `${m.name} ${m.role} ${m.grade} ${RS.ideals[m.ideal].name} ${m.email}`.toLowerCase();
+    const hay = `${m.name} ${m.role} ${m.grade || ""} ${m.ideal ? RS.ideals[m.ideal].name : ""} ${m.email}`.toLowerCase();
     return query.split(/\s+/).every((w) => hay.includes(w));
   }
 

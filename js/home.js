@@ -248,9 +248,11 @@
       const d = parseDate(h.date);
       return `
       <li class="${animate ? "in" : ""}" style="animation-delay:${i * 50}ms">
-        <span class="when">${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}<span>${esc(RS.ideals[h.ideal].name)}</span></span>
-        <span class="marker" data-i="${h.ideal}" aria-hidden="true">${h.ideal}</span>
-        <div class="entry"><h3>${esc(h.title)}</h3><p>${esc(h.body)}</p></div>
+        <span class="when">${d.getDate()} ${d.toLocaleDateString("en-GB", { month: "short" })}</span>
+        <div class="entry">
+          <span class="ideal-tag"><span class="marker" data-i="${h.ideal}" aria-hidden="true">${h.ideal}</span>${esc(RS.ideals[h.ideal].name)}</span>
+          <h3>${esc(h.title)}</h3><p>${esc(h.body)}</p>
+        </div>
       </li>`;
     }).join("") : `<li class="empty">No highlights for ${esc(RS.ideals[filter].name)} yet. Be the first: <a href="register.html">join an event</a>.</li>`;
   }
