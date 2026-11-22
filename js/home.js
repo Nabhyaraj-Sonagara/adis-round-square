@@ -92,7 +92,7 @@
   const facingEl = $("#facing");
   let lastFacing = null;
   window.RSAscii.mount($("#orbit-canvas"), globe.shader, {
-    bg: "#1f1b2e", cell: 13, draggable: true,
+    bg: "#1f1b2e", cell: 10, draggable: true,
     frame(s) {
       globe.frame(s);
       const f = Math.round(s.facing);

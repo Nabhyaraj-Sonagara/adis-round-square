@@ -4,7 +4,7 @@ A static site with three pages:
 
 - `index.html`: **Common Ground**. The newsletter reader (switch issues), the six IDEALS and the RS Bulletin (highlights you can filter by IDEAL, plus upcoming events with live countdowns).
 - `committee.html`: the committee as flip cards. Tap a card to see contacts and copy an email or phone number. Search by name, role or IDEAL.
-- `register.html`: sign-up in three steps. Pick an event or project, add your details, pick your IDEALS. You get a ticket with a code and an "Add to calendar" file.
+- `register.html`: sign-up in three steps. Pick an event or project, add your details, then say in a few sentences why you are a good fit. You get a ticket with a meeting code and an "Add to calendar" file.
 
 Colours and type follow the ADIS × Round Square design system: purple, blue, red and gold, Source Serif 4 with Barlow, and the Meeting Band.
 
@@ -26,7 +26,7 @@ Everything is in **`js/data.js`**. All of it is sample content right now: replac
 
 ## Collecting registrations
 
-By default, registrations are saved only in the student's own browser (they appear under "My registrations"). To collect them centrally, set `config.registrationEndpoint` to a URL that accepts a JSON POST, such as a Formspree form or a Google Apps Script web app that writes to a Sheet. Each registration has these fields: `code, eventId, eventTitle, name, grade, section, email, phone, ideals, notes, ts`.
+By default, registrations are saved only in the student's own browser (they appear under "My registrations"). To collect them centrally, set `config.registrationEndpoint` to a URL that accepts a JSON POST, such as a Formspree form or a Google Apps Script web app that writes to a Sheet. Each registration has these fields: `code, eventId, eventTitle, name, grade, section, email, phone, suitability, notes, ts`.
 
 ## Easter eggs (committee eyes only)
 

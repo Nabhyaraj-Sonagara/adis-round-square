@@ -207,7 +207,7 @@ body.sunrise .motto { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .orbit .plate::before, .orbit .plate::after, .orbit .plate .crop::before, .orbit .plate .crop::after { border-color: #6e6880; }
 .orbit .plate figcaption { color: #b7b1c2; }
 .orbit .plate figcaption b { color: var(--on-brand); }
-.orbit-stats { display: flex; gap: var(--space-12); margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid #3d3850; }
+.orbit-stats { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid #3d3850; }
 .orbit-stats dt { font: 500 13px/18px var(--font-sans); color: #b7b1c2; }
 .orbit-stats dd { margin: 0; font: 600 28px/34px var(--font-sans); color: var(--on-brand); font-variant-numeric: tabular-nums; }
 .ascii { display: block; width: 100%; touch-action: pan-y; }

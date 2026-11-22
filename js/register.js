@@ -1,8 +1,7 @@
-/* Register: three-step form, launch sequence, printed ticket, calendar file and "My registrations". */
+/* Register: three-step form, 3-2-1 countdown, printed ticket, calendar file and "My registrations". */
 (function () {
   const RS = window.RS;
   const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, reduceMotion } = window.RSU;
-  const order = ["I", "D", "E", "A", "L", "S"];
   const form = $("#reg-form");
   const now = new Date();
   const events = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
@@ -57,17 +56,14 @@
     renderSummary();
   });
 
-  /* ---------- Step 3: IDEALS chips ---------- */
-  const why = new Set();
-  $("#why-ideals").innerHTML = order.map((k) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false"><span class="marker" data-i="${k}">${k}</span>${esc(RS.ideals[k].name)}</button>`).join("");
-  $("#why-ideals").addEventListener("click", (e) => {
-    const c = e.target.closest(".chip");
-    if (!c) return;
-    const k = c.dataset.k;
-    why.has(k) ? why.delete(k) : why.add(k);
-    c.setAttribute("aria-pressed", why.has(k));
-    if (why.size === 6) toast("All six IDEALS. Kurt Hahn would approve.", "★");
-  });
+  /* ---------- Step 3: why you're a good fit ---------- */
+  const fit = $("#f-fit"), fitCount = $("#fit-count");
+  const sentences = (s) => (s.match(/[^.!?]*[a-z][^.!?]*[.!?]+/gi) || []).length + (/[a-z][^.!?]*$/i.test(s) ? 1 : 0);
+  function updateFitCount() {
+    const n = sentences(fit.value.trim());
+    fitCount.textContent = `${n} ${n === 1 ? "sentence" : "sentences"}, ${fit.value.length} of ${fit.maxLength} characters`;
+  }
+  fit.addEventListener("input", updateFitCount);
 
   /* ---------- Summary sidebar ---------- */
   function renderSummary() {
@@ -103,6 +99,7 @@
       if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
     });
     $("#steps").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (n === 3) $("#fit-title").textContent = `Why are you a good fit for ${byId(picked).title}?`;
     const first = $(`.panel[data-step="${n}"]`).querySelector("input:not([type=radio]), select, textarea");
     if (first && n !== 1) setTimeout(() => first.focus({ preventScroll: true }), 300);
   }
@@ -127,6 +124,14 @@
       firstBad?.focus();
       return !firstBad;
     }
+    if (n === 3) {
+      const f = fit.closest(".field");
+      const ok = fit.value.trim().length >= 40;
+      f.classList.remove("invalid"); void f.offsetWidth;
+      f.classList.toggle("invalid", !ok);
+      if (!ok) fit.focus();
+      return ok;
+    }
     return true;
   }
 
@@ -144,6 +149,7 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (step !== 3) { if (validStep(step)) go(step + 1); return; }
+    if (!validStep(3)) return;
     const btn = $("#submit-btn");
     if (btn.disabled) return;
     btn.disabled = true;
@@ -156,7 +162,7 @@
       section: $("#f-section").value,
       email: $("#f-email").value.trim(),
       phone: $("#f-phone").value.trim(),
-      ideals: [...why],
+      suitability: fit.value.trim(),
       notes: $("#f-notes").value.trim(),
       ts: new Date().toISOString(),
     };
@@ -169,7 +175,7 @@
     }
     if (!reduceMotion) {
       btn.classList.add("counting");
-      for (const n of ["3", "2", "1", "Lift-off"]) { btn.textContent = n; await wait(n === "Lift-off" ? 500 : 420); }
+      for (const n of ["3", "2", "1"]) { btn.textContent = n; await wait(420); }
       btn.classList.remove("counting");
     }
     const sent = await sending;
@@ -191,8 +197,8 @@
     const note = sent === true
       ? `You're in. The committee has your registration. Questions? Write to ${mail}.`
       : sent === false
-        ? `Your ticket is saved on this device, but it didn't reach the committee. Email your ticket code to ${mail} to confirm your place.`
-        : `You're in. Keep your ticket code and show it at the event. Questions? Write to ${mail}.`;
+        ? `Your ticket is saved on this device, but it didn't reach the committee. Email your meeting code to ${mail} to confirm your place.`
+        : `You're in. Keep your meeting code and show it at the event. Questions? Write to ${mail}.`;
     $("#ticket").innerHTML = `
       <div class="ticket-slot" aria-hidden="true"></div>
       <div class="ticket-feed">
@@ -209,7 +215,7 @@
             </dl>
           </div>
           <div class="stub">
-            <span class="label">Ticket code</span>
+            <span class="label">Meeting code</span>
             <span class="code">${esc(r.code)}</span>
             <span class="barcode" aria-hidden="true">${bars.map((w, i) => `<i style="width:${w}px;opacity:${i % 3 ? 1 : .6}"></i>`).join("")}</span>
           </div>
@@ -230,7 +236,7 @@
       "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ADIS Round Square//Register//EN", "BEGIN:VEVENT",
       `UID:${lastReg.code}@adis-roundsquare`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(start)}`, `DTEND:${f(end)}`,
       `SUMMARY:${icsText(e.title)}`, `LOCATION:${icsText(e.place)}`,
-      `DESCRIPTION:Ticket ${lastReg.code}. ${icsText(e.body)}`, "END:VEVENT", "END:VCALENDAR",
+      `DESCRIPTION:Meeting code ${lastReg.code}. ${icsText(e.body)}`, "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
@@ -240,9 +246,8 @@
   });
 
   $("#again-btn").addEventListener("click", () => {
-    picked = null; why.clear();
-    $$("#why-ideals .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
-    $("#f-notes").value = "";
+    picked = null;
+    fit.value = ""; $("#f-notes").value = ""; updateFitCount();
     renderPicks(); renderSummary();
     go(1);
   });

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=8">
+  <link rel="stylesheet" href="css/styles.css?v=9">
 </head>
 <body data-page="register">
   <header id="site-header"></header>
@@ -35,7 +35,7 @@
           <ol class="steps" id="steps">
             <li class="active"><span class="n">1</span>Pick</li>
             <li><span class="n">2</span>About you</li>
-            <li><span class="n">3</span>Why</li>
+            <li><span class="n">3</span>Why you</li>
             <li><span class="n">4</span>Ticket</li>
           </ol>
 
@@ -95,20 +95,22 @@
                 </div>
                 <div class="panel-actions">
                   <button type="button" class="btn secondary" data-back>Back</button>
-                  <button type="button" class="btn primary" data-next>Next: why</button>
+                  <button type="button" class="btn primary" data-next>Next: why you</button>
                 </div>
               </div>
 
               <!-- Step 3 -->
               <div class="panel" data-step="3" hidden>
-                <h2 class="headline">Why are you joining?</h2>
-                <div class="field" style="margin-top:24px">
-                  <span class="label-text">IDEALS</span>
-                  <div class="chips" id="why-ideals" role="group" aria-label="IDEALS"></div>
+                <h2 class="headline" id="fit-title">Why are you a good fit?</h2>
+                <div class="field" style="margin-top:24px;max-width:680px">
+                  <label for="f-fit">In two or three sentences, tell us what you'd bring</label>
+                  <textarea id="f-fit" name="suitability" maxlength="600" required aria-describedby="fit-count" placeholder="I chaired our class debate last term and I like listening as much as speaking."></textarea>
+                  <p class="caption" id="fit-count" style="margin:6px 0 0">0 sentences, 0 of 600 characters</p>
+                  <p class="err">Write a few sentences about why you'd be a good fit.</p>
                 </div>
                 <div class="field" style="margin-top:24px;max-width:680px">
-                  <label for="f-notes">Anything we should know?</label>
-                  <textarea id="f-notes" name="notes" placeholder="Allergies, access needs, questions, or a great idea"></textarea>
+                  <label for="f-notes">Anything we should know? <span class="muted">(optional)</span></label>
+                  <textarea id="f-notes" name="notes" placeholder="Allergies, access needs or questions"></textarea>
                 </div>
                 <div class="panel-actions">
                   <button type="button" class="btn secondary" data-back>Back</button>
@@ -143,9 +145,9 @@
 
   <footer id="site-footer"></footer>
 
-  <script src="js/data.js?v=8"></script>
-  <script src="js/main.js?v=8"></script>
-  <script src="js/ascii.js?v=8"></script>
-  <script src="js/register.js?v=8"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/main.js?v=9"></script>
+  <script src="js/ascii.js?v=9"></script>
+  <script src="js/register.js?v=9"></script>
 </body>
 </html>

@@ -76,21 +76,72 @@
     return state;
   }
 
-  /* ---------- Globe: a graticule sphere with the network's schools as nodes, ADIS in red ---------- */
+  /* ---------- Globe: coarse continents, the network's schools as gold nodes, ADIS in red ---------- */
+  // Rough coastlines as [lon, lat] rings. Coarse on purpose: they only need to read as continents at ASCII size.
+  const LAND = [
+    // Eurasia, from Iberia east along the Mediterranean, round Arabia and India, up the Pacific coast and back along the Arctic.
+    [[-9,43],[-9,37],[-5,36],[0,38],[3,42],[7,43.5],[10,44],[13,41],[16,38],[18,40],[13,45],[19,42],[22,37],[24,38],[26,40],[27,37],[30,36],[36,36],[35,33],[34,29],[39,21],[43,13],[45,13],[52,16],[56,18],[59,22],[56,26],[52,24],[50,27],[48,30],[50,30],[56,27],[62,25],[67,24.5],[68.5,23.5],[69,22.3],[70.5,20.8],[72.3,21.5],[72.7,21],[73,19],[73.5,16],[75,12],[77,8],[78.5,9],[80,13],[80,15.5],[82,17],[85,19.5],[87,21.5],[90,22],[92,21],[94,17],[97,16],[98,10],[100,7],[103,1.5],[104,1.5],[103,4],[101,7],[100,13],[102,12.5],[105,9],[107,11],[109,12],[108,16],[106,19],[108,21.5],[111,21],[114,22.5],[117,23.5],[120,27],[122,30],[121,32],[120,34],[119,35],[122,37],[118,38],[118,39],[121,41],[122,40],[125,40],[127,38],[129,35],[129,38],[128,40],[130,42],[133,43],[137,45],[140,48],[141,52],[137,54],[135,55],[140,59],[148,59],[155,59],[156,51],[160,54],[163,57],[163,60],[170,60],[178,63],[180,65],[180,69],[170,70],[160,70],[150,71],[140,73],[130,71],[120,73],[113,74],[105,77],[100,79],[90,76],[80,73],[70,73],[67,69],[60,70],[50,68],[44,68],[40,66],[34,69],[28,71],[20,70],[14,67],[10,63],[5,62],[5,58],[8,58],[11,59],[12,56],[10,55],[8,54],[5,53],[3,51],[-2,48],[-5,48],[-1,46],[-2,43.5]],
+    [[-17,21],[-13,28],[-9,32],[-6,36],[10,37],[11,33],[20,31],[25,32],[32,31],[34,28],[39,19],[43,12],[51,12],[48,5],[40,-3],[39,-8],[40,-15],[35,-20],[33,-26],[28,-33],[20,-35],[18,-32],[12,-18],[13,-10],[9,-1],[9,4],[4,6],[-4,5],[-8,4],[-13,8],[-17,14]],
+    [[44,-25],[47,-25],[50,-15],[49,-12],[44,-17]],
+    [[-168,66],[-156,71.5],[-140,70],[-128,70],[-115,68],[-95,72],[-85,70],[-80,63],[-94,59],[-90,57],[-82,55],[-79,52],[-77,60],[-70,62],[-64,60],[-56,53],[-60,47],[-66,44],[-70,42],[-74,40],[-76,35],[-81,31],[-80,25],[-83,29],[-90,30],[-97,27],[-98,22],[-95,18],[-90,21],[-87,21],[-88,16],[-84,15],[-83,10],[-80,8],[-78,9],[-80,7],[-85,10],[-92,14],[-105,20],[-110,24],[-112,29],[-117,32],[-120,34],[-124,40],[-124,46],[-123,49],[-130,54],[-135,58],[-140,60],[-147,61],[-152,59],[-158,57],[-164,55],[-158,58],[-165,62],[-165,65]],
+    [[-73,78],[-60,82],[-30,83],[-20,80],[-20,72],[-25,69],[-40,65],[-44,60],[-50,62],[-54,67],[-58,75],[-70,77]],
+    [[-80,9],[-75,11],[-72,12],[-63,10.5],[-60,8],[-52,5],[-50,1],[-44,-2],[-35,-5],[-35,-9],[-39,-14],[-41,-22],[-48,-26],[-53,-34],[-58,-38],[-62,-39],[-65,-42],[-66,-47],[-69,-51],[-68,-55],[-72,-53],[-75,-48],[-73,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-6],[-80,-1],[-78,2],[-77,7]],
+    [[114,-22],[114,-26],[115,-34],[118,-35],[124,-33],[129,-32],[132,-32],[135,-35],[138,-35],[140,-38],[146,-39],[150,-37],[153,-32],[153,-25],[149,-21],[146,-18],[145,-15],[142,-11],[141,-17],[137,-16],[136,-12],[131,-11],[127,-14],[122,-17],[118,-20]],
+    [[172,-34],[178,-38],[175,-41],[171,-46],[167,-46],[171,-41]],
+    [[130,31],[132,34],[135,34],[140,35],[141,38],[142,42],[145,44],[142,46],[140,42],[139,38],[136,37],[132,35]],
+    [[-5,50],[1,51],[2,53],[-1,55],[-2,58],[-5,58],[-6,56],[-3,54],[-5,52]],
+    [[-10,52],[-6,52],[-6,55],[-8,55]],
+    [[-24,64],[-14,64],[-14,66],[-22,66]],
+    [[80,6],[82,7],[81,9.5],[80,9]],
+    [[95,5.5],[98,4],[104,-2],[106,-6],[102,-4],[96,2]],
+    [[109,1],[111,-3],[116,-4],[119,1],[117,7],[113,3]],
+    [[105,-6],[114,-7],[114,-8.5],[106,-7.5]],
+    [[131,-1],[138,-2],[147,-6],[150,-10],[142,-9],[138,-8],[132,-3]],
+    [[120,18],[122,18],[124,13],[126,7],[122,7],[120,14]],
+  ];
+  let landMap = null;
+  function isLand(latDeg, lonDeg) {
+    if (!landMap) {
+      // One-degree lookup grid, built once on first use.
+      landMap = new Uint8Array(360 * 180);
+      const inside = (x, y, ring) => {
+        let hit = false;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i], [xj, yj] = ring[j];
+          if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit;
+        }
+        return hit;
+      };
+      for (let la = 0; la < 180; la++) for (let lo = 0; lo < 360; lo++) {
+        const y = la - 89.5, x = lo - 179.5;
+        landMap[la * 360 + lo] = y < -68 || LAND.some((r) => inside(x, y, r)) ? 1 : 0;
+      }
+    }
+    const la = Math.min(179, Math.max(0, Math.floor(latDeg + 90)));
+    const lo = ((Math.floor(lonDeg + 180) % 360) + 360) % 360;
+    return landMap[la * 360 + lo] === 1;
+  }
+
   function globe() {
-    const R = 0.86;
+    const R = 0.86, deg = 180 / Math.PI;
+    const vec = (lat, lon) => [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.cos(lat) * Math.cos(lon)];
+    // Other member schools: illustrative positions, but always on land.
     const nodes = [];
     let seed = 7;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (let i = 0; i < 46; i++) {
-      const lat = Math.asin(rnd() * 1.6 - 0.8), lon = rnd() * Math.PI * 2;
-      nodes.push([Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.cos(lat) * Math.cos(lon)]);
+    // ADIS, Shantigram, Ahmedabad.
+    const adisLat = 23.16 / deg, adisLon = 72.54 / deg;
+    const adis = vec(adisLat, adisLon);
+    const dot = (p, q) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+    while (nodes.length < 60) {
+      const lat = Math.asin(rnd() * 1.5 - 0.6), lon = rnd() * Math.PI * 2 - Math.PI;
+      const v = vec(lat, lon);
+      if (isLand(lat * deg, lon * deg) && dot(v, adis) < 0.99) nodes.push(v);
     }
-    const adisLat = 23.1 * Math.PI / 180, adisLon = 72.5 * Math.PI / 180;
-    const adis = [Math.cos(adisLat) * Math.sin(adisLon), Math.sin(adisLat), Math.cos(adisLat) * Math.cos(adisLon)];
     const L = (() => { const v = [-0.55, -0.5, 0.67]; const m = Math.hypot(...v); return v.map((n) => n / m); })();
-    const ramp = " ..::-=";
-    let rot = -adisLon, tilt = 0.35, prevT = 0, pdx = 0, pdy = 0;
+    const sea = " ..:", ground = ".:-=+";
+    const tag = "ADIS";
+    let rot = -adisLon, tilt = -0.3, prevT = 0, pdx = 0, pdy = 0;
 
     const frame = (s) => {
       const dt = prevT ? Math.min(0.1, s.t - prevT) : 0; prevT = s.t;
@@ -100,9 +151,20 @@
       s.facing = (((-rot * 180 / Math.PI) % 360) + 540) % 360 - 180;
       s.cosT = Math.cos(tilt); s.sinT = Math.sin(tilt); s.cosR = Math.cos(rot); s.sinR = Math.sin(rot);
       s.pulse = 0.5 + 0.5 * Math.sin(s.t * 4);
+      // Where ADIS sits on screen, for the callout: spin, then tilt, the reverse of the shader's mapping.
+      const z1 = -adis[0] * s.sinR + adis[2] * s.cosR;
+      const nx = adis[0] * s.cosR + adis[2] * s.sinR, ny = adis[1] * s.cosT + z1 * s.sinT, nz = -adis[1] * s.sinT + z1 * s.cosT;
+      s.adisVisible = nz > 0.2;
+      s.ax = nx * R; s.ay = -ny * R;
     };
 
     const shader = (x, y, s, c, r) => {
+      // Callout: a short leader and the name, to the right of the red dot.
+      if (s.adisVisible && Math.abs(y - s.ay) < s.ch / 2) {
+        const k = Math.floor((x - s.ax - s.cw * 1.5) / s.cw);
+        if (k >= 0 && k < 2) return ["-", rgba(C.red, 1)];
+        if (k >= 3 && k < 3 + tag.length) return [tag[k - 3], rgba(C.white, 1)];
+      }
       const d2 = x * x + y * y;
       const ex = x / 1.22, ey = (y - x * 0.18) / 0.3, ring = Math.abs(Math.sqrt(ex * ex + ey * ey) - 1) * 0.3;
       if (d2 > R * R) {
@@ -123,13 +185,19 @@
       // Into the globe's own frame: undo tilt (about x), then spin (about y).
       const y1 = ny * s.cosT - nz * s.sinT, z1 = ny * s.sinT + nz * s.cosT;
       const gx = nx * s.cosR - z1 * s.sinR, gz = nx * s.sinR + z1 * s.cosR, gy = y1;
-      if (adis[0] * gx + adis[1] * gy + adis[2] * gz > 0.9985 - s.pulse * 0.0012) return ["@", rgba(C.red, 1)];
-      for (const n of nodes) if (n[0] * gx + n[1] * gy + n[2] * gz > 0.9988) return ["o", rgba(C.gold, 0.55 + 0.45 * b)];
+      const g = [gx, gy, gz], toAdis = dot(adis, g);
+      if (toAdis > 0.9993) return ["@", rgba(C.red, 1)];
+      if (toAdis > 0.9965 && toAdis < 0.9978) return ["o", rgba(C.red, 0.35 + 0.65 * s.pulse)];
+      for (const n of nodes) if (dot(n, g) > 0.9992) return ["o", rgba(C.gold, 0.6 + 0.4 * b)];
       const lat = Math.asin(Math.max(-1, Math.min(1, gy))), lon = Math.atan2(gx, gz);
+      if (isLand(lat * deg, lon * deg)) {
+        const i = Math.min(ground.length - 1, Math.floor(b * ground.length));
+        return [ground[i], mix([200, 170, 208], [250, 246, 251], (b - 0.22) / 0.78, 0.45 + 0.5 * b)];
+      }
       const onLat = Math.abs(Math.sin(lat * 6)) < 0.09, onLon = Math.abs(Math.sin(lon * 6)) < 0.09 * (1 + Math.abs(gy) * 3);
-      if (onLat || onLon) return [onLat && onLon ? "+" : onLat ? "-" : "|", rgba(C.blueTint, 0.1 + 0.9 * b * b)];
-      const i = Math.max(1, Math.floor(b * (ramp.length - 0.01)));
-      return [ramp[i], mix([127, 50, 134], [243, 234, 244], (b - 0.22) / 0.78, 0.45 + 0.55 * b)];
+      if (onLat || onLon) return [onLat && onLon ? "+" : onLat ? "-" : "|", rgba(C.blueTint, 0.08 + 0.4 * b * b)];
+      const i = Math.max(1, Math.floor(b * (sea.length - 0.01)));
+      return [sea[i], mix([127, 50, 134], [190, 150, 196], (b - 0.22) / 0.78, 0.35 + 0.45 * b)];
     };
     return { shader, frame };
   }
