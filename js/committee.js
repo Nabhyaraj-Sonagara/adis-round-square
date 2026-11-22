@@ -15,7 +15,6 @@
   let group = "all", query = "", hahnShown = false;
   const membersEl = $("#members");
   const filterEl = $("#group-filter");
-  $("#mail-all").href = `mailto:${RS.config.committeeEmail}`;
 
   filterEl.innerHTML = `<button class="chip plain" data-g="all" aria-pressed="true">Everyone</button>` +
     groups.map((g) => `<button class="chip plain" data-g="${g.key}" aria-pressed="false">${g.label}</button>`).join("");
@@ -40,7 +39,7 @@
     return `
       <li class="${animate ? "in" : ""} ${extra}" style="animation-delay:${Math.min(i, 12) * 40}ms">
         <span class="avatar" data-i="${colour}" aria-hidden="true">${esc(initials(m.name))}</span>
-        <span class="who"><strong>${esc(m.name)}</strong><span>${esc(m.role)}</span></span>
+        <span class="who"><strong>${esc(m.name)}</strong><span>${esc(m.role)}</span>${m.note ? `<em class="note">${esc(m.note)}</em>` : ""}</span>
         <span class="grade">${grade ? `<b>${grade}</b>` : ""}${m.ideal ? esc(RS.ideals[m.ideal].name) : ""}</span>
         <span class="contact">${contact}</span>
       </li>`;
@@ -48,7 +47,7 @@
 
   function matches(m) {
     if (!query) return true;
-    const hay = `${m.name} ${m.role} ${m.grade || ""} ${m.ideal ? RS.ideals[m.ideal].name : ""} ${m.email}`.toLowerCase();
+    const hay = `${m.name} ${m.role} ${m.note || ""} ${m.grade || ""} ${m.ideal ? RS.ideals[m.ideal].name : ""} ${m.email}`.toLowerCase();
     return query.split(/\s+/).every((w) => hay.includes(w));
   }
 

@@ -1,10 +1,9 @@
 /* Home: opening animation, hero, orbit globe, IDEALS, newsletter reader and RS Bulletin. */
 (function () {
   const RS = window.RS;
-  const { esc, $, $$, dateBlock, parseDate, foundEgg, reduceMotion, spotsLeft } = window.RSU;
+  const { esc, $, $$, dateBlock, parseDate, foundEgg, reduceMotion, isClosed, upcomingEvents, shortDate, whenText } = window.RSU;
   const order = ["I", "D", "E", "A", "L", "S"];
-  const now = new Date();
-  const upcoming = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  const upcoming = upcomingEvents();
   const latest = RS.newsletters[0];
 
   /* ---------- Opening animation: ends on its own, or on any click or key ---------- */
@@ -196,7 +195,7 @@
           <aside class="coming-up">
             <h3 class="title">Coming up</h3>
             <ul class="events">${upcoming.slice(0, 3).map((e, j) => `
-              <li>${dateBlock(e.date, j % 2 === 1)}<div><h4>${esc(e.title)}</h4><p class="caption">${esc(e.place.split(",")[0])}</p></div></li>`).join("")}
+              <li>${dateBlock(e.date, j % 2 === 1)}<div><h4>${esc(e.title)}</h4><p class="caption">${esc(whenText(e))}</p></div></li>`).join("")}
             </ul>
             <a class="btn primary" href="register.html" style="margin-top:16px">Register</a>
           </aside>
@@ -264,18 +263,53 @@
   }
   renderHighlights(false);
 
-  /* ---------- RS Bulletin: upcoming with T-minus countdowns ---------- */
-  const upEl = $("#upcoming");
-  upEl.innerHTML = upcoming.map((e, i) => `
-    <li>
+  /* ---------- RS Bulletin: upcoming, filterable by type, with details and T-minus countdowns ---------- */
+  const upEl = $("#upcoming"), upFilters = $("#up-filters"), upMore = $("#up-more");
+  const SHOW = 6;
+  let upTag = "all", upAll = false;
+  const usedTags = Object.keys(RS.tags).filter((k) => upcoming.some((e) => e.tag === k));
+  upFilters.innerHTML = `<button class="chip plain" data-t="all" aria-pressed="true">All</button>` +
+    usedTags.map((k) => `<button class="chip plain" data-t="${k}" aria-pressed="false">${esc(RS.tags[k].many)}</button>`).join("");
+  upFilters.addEventListener("click", (e) => {
+    const c = e.target.closest(".chip");
+    if (!c) return;
+    upTag = c.dataset.t; upAll = false;
+    $$(".chip", upFilters).forEach((x) => x.setAttribute("aria-pressed", x === c));
+    renderUpcoming(true);
+  });
+  upMore.addEventListener("click", () => { upAll = !upAll; renderUpcoming(false); });
+
+  function upItem(e, i, animate) {
+    const closed = isClosed(e);
+    const details = [
+      `<p>${esc(e.body)}</p>`,
+      e.prep && `<p><b>Before the call</b> ${esc(e.prep)}</p>`,
+      e.deadline && `<p><b>Sign up by</b> ${shortDate(e.deadline)}${closed ? " (closed)" : ""}</p>`,
+      e.contact && `<p><b>Ask</b> ${esc(e.contact)}</p>`,
+    ].filter(Boolean).join("");
+    return `
+    <li class="${animate ? "in" : ""}" style="animation-delay:${i * 40}ms">
       ${dateBlock(e.date, i % 2 === 1)}
       <div class="info">
+        <span class="up-type t-${e.tag}">${esc(RS.tags[e.tag].one)}</span>
         <h4>${esc(e.title)}</h4>
-        <p class="caption">${esc(RS.tags[e.tag].one)}, ${spotsLeft(e)} spots left</p>
-        <p class="tminus" data-t="${parseDate(e.date).getTime()}"><span>T–</span><span class="digits"></span></p>
+        <p class="caption">${esc(e.host)}</p>
+        <p class="caption">${esc(whenText(e))}. ${esc(e.grades)}</p>
+        ${closed ? `<p class="up-closed">Sign-ups closed ${shortDate(e.deadline)}</p>` : `<p class="tminus" data-t="${parseDate(e.date).getTime()}"><span>T–</span><span class="digits"></span></p>`}
+        <details class="up-more"><summary>Details</summary>${details}</details>
       </div>
-      <a class="go" href="register.html?event=${encodeURIComponent(e.id)}" aria-label="Sign up for ${esc(e.title)}">Sign up</a>
-    </li>`).join("");
+      ${closed ? "" : `<a class="go" href="register.html?event=${encodeURIComponent(e.id)}" aria-label="Sign up for ${esc(e.title)}">Sign up</a>`}
+    </li>`;
+  }
+  function renderUpcoming(animate) {
+    const list = upcoming.filter((e) => upTag === "all" || e.tag === upTag);
+    const shown = upAll ? list : list.slice(0, SHOW);
+    upEl.innerHTML = shown.length ? shown.map((e, i) => upItem(e, i, animate)).join("")
+      : `<li class="empty">Nothing coming up here yet.</li>`;
+    upMore.hidden = list.length <= SHOW;
+    upMore.textContent = upAll ? "Show fewer" : `Show all ${list.length}`;
+    tick();
+  }
   const pad = (n) => String(n).padStart(2, "0");
   function tick() {
     const t = Date.now();
@@ -296,6 +330,6 @@
       });
     });
   }
-  tick();
+  renderUpcoming(false);
   setInterval(tick, 1000);
 })();

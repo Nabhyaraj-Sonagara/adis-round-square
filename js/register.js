@@ -1,29 +1,30 @@
 /* Register: three-step form, 3-2-1 countdown, printed ticket, calendar file and "My registrations". */
 (function () {
   const RS = window.RS;
-  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, reduceMotion } = window.RSU;
+  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, reduceMotion } = window.RSU;
   const form = $("#reg-form");
-  const now = new Date();
-  const events = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  const events = upcomingEvents();
   const byId = (id) => RS.events.find((e) => e.id === id);
-  const where = (e) => e.place.split(",")[0];
 
   window.RSAscii.mount($("#sun-canvas"), window.RSAscii.sunrise(), { bg: "#7f3286", cell: 13 });
 
   let step = 1, typeFilter = "all", lastReg = null;
   let picked = new URLSearchParams(location.search).get("event");
-  if (picked && !events.some((e) => e.id === picked && spotsLeft(e) > 0 && !regs.has(e.id))) picked = null;
+  if (picked && !events.some((e) => e.id === picked && spotsLeft(e) > 0 && !isClosed(e) && !regs.has(e.id))) picked = null;
 
   /* ---------- Step 1: pick ---------- */
   const picksEl = $("#picks");
   function renderPicks() {
     const list = events.filter((e) => typeFilter === "all" || e.tag === typeFilter);
     picksEl.innerHTML = list.map((e, i) => {
-      const left = spotsLeft(e), mine = regs.has(e.id), full = left === 0 && !mine;
-      const pct = Math.round(((e.spots - left) / e.spots) * 100);
+      const left = spotsLeft(e), mine = regs.has(e.id), closed = isClosed(e) && !mine, full = left === 0 && !mine;
+      const avail = closed ? `<strong>Closed</strong>Sign-ups ended ${shortDate(e.deadline)}`
+        : full ? "<strong>Full</strong>Ask about the waitlist"
+        : e.spots ? `<strong>${left}</strong>of ${e.spots} spots left<span class="meter ${left <= 5 ? "low" : ""}" aria-hidden="true"><i style="width:${Math.round(((e.spots - left) / e.spots) * 100)}%"></i></span>`
+        : `<strong>Open</strong>${e.deadline ? `Sign up by ${shortDate(e.deadline)}` : "Sign up any time"}`;
       return `
         <div class="pick">
-          <input type="radio" name="event" id="ev-${e.id}" value="${e.id}" ${picked === e.id ? "checked" : ""} ${mine || full ? "disabled" : ""}>
+          <input type="radio" name="event" id="ev-${e.id}" value="${e.id}" ${picked === e.id ? "checked" : ""} ${mine || full || closed ? "disabled" : ""}>
           <label for="ev-${e.id}">
             <span class="radio" aria-hidden="true"></span>
             ${dateBlock(e.date, i % 2 === 1)}
@@ -31,11 +32,9 @@
               <span class="type-tag ${mine ? "mine" : `t-${e.tag}`}">${mine ? "You're in" : esc(RS.tags[e.tag].one)}</span>
               <h3>${esc(e.title)}</h3>
               <p>${esc(e.body)}</p>
-              <span class="meta">${fmtTime(e.date)}, Grades ${esc(e.grades)}. ${esc(e.place)}</span>
+              <span class="meta">${esc(whenText(e))}. ${esc(e.grades)}. ${esc(e.host)}, ${esc(e.place)}</span>
             </span>
-            <span class="avail">${full ? "<strong>Full</strong>Ask about the waitlist" : `<strong>${left}</strong>of ${e.spots} spots left`}
-              <span class="meter ${left <= 5 ? "low" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span>
-            </span>
+            <span class="avail">${avail}</span>
           </label>
         </div>`;
     }).join("") || `<p class="empty">Nothing here right now. New events go up every fortnight.</p>`;
@@ -71,7 +70,7 @@
     $("#your-pick").innerHTML = e ? `
       <p class="label strong" style="margin:0">Your pick</p>
       <h3 class="title">${esc(e.title)}</h3>
-      <ul class="events"><li>${dateBlock(e.date)}<div><p class="caption" style="color:var(--ink)">${fmtLong(e.date)}</p><p class="caption">${fmtTime(e.date)}, ${esc(where(e))}</p></div></li></ul>`
+      <ul class="events"><li>${dateBlock(e.date)}<div><p class="caption" style="color:var(--ink)">${esc(e.when || (e.dateLabel ? whenText(e) : fmtLong(e.date)))}</p><p class="caption">${esc(e.host)}</p></div></li></ul>`
       : `<p class="label strong" style="margin:0">Your pick</p><p class="none">Choose what you'd like to join and it will show up here.</p>`;
   }
   function renderMine() {
@@ -209,9 +208,9 @@
             <dl>
               <div><dt>Name</dt><dd>${esc(r.name)}</dd></div>
               <div><dt>Grade</dt><dd>${esc(r.grade)}${esc(r.section)}</dd></div>
-              <div><dt>Date</dt><dd>${parseDate(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</dd></div>
-              <div><dt>Time</dt><dd>${fmtTime(e.date)}</dd></div>
-              <div style="grid-column:span 2"><dt>Where</dt><dd>${esc(e.place)}</dd></div>
+              <div><dt>${esc(e.dateLabel || "Date")}</dt><dd>${esc(e.when || parseDate(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }))}</dd></div>
+              ${fmtTime(e.date) ? `<div><dt>Time (IST)</dt><dd>${fmtTime(e.date)}</dd></div>` : ""}
+              <div style="grid-column:span 2"><dt>Where</dt><dd>${esc(e.host)}, ${esc(e.place)}</dd></div>
             </dl>
           </div>
           <div class="stub">
@@ -229,13 +228,18 @@
     if (!lastReg) return;
     const e = byId(lastReg.eventId);
     const start = parseDate(e.date);
-    const end = new Date(start.getTime() + 2 * 3600 * 1000);
     const f = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    // Timed events get two hours; all-day ones run to the day after their last day.
+    const allDay = e.date.length === 10;
+    const ymd = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    const last = parseDate(e.ends || e.date); last.setDate(last.getDate() + 1);
+    const span = allDay ? [`DTSTART;VALUE=DATE:${ymd(start)}`, `DTEND;VALUE=DATE:${ymd(last)}`]
+      : [`DTSTART:${f(start)}`, `DTEND:${f(new Date(start.getTime() + 2 * 3600 * 1000))}`];
     const icsText = (s) => s.replace(/([,;\\])/g, "\\$1");
     const ics = [
       "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ADIS Round Square//Register//EN", "BEGIN:VEVENT",
-      `UID:${lastReg.code}@adis-roundsquare`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(start)}`, `DTEND:${f(end)}`,
-      `SUMMARY:${icsText(e.title)}`, `LOCATION:${icsText(e.place)}`,
+      `UID:${lastReg.code}@adis-roundsquare`, `DTSTAMP:${f(new Date())}`, ...span,
+      `SUMMARY:${icsText(e.title)}`, `LOCATION:${icsText(`${e.host}, ${e.place}`)}`,
       `DESCRIPTION:Meeting code ${lastReg.code}. ${icsText(e.body)}`, "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
     const a = document.createElement("a");

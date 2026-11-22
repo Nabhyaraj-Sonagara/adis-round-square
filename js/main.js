@@ -27,7 +27,19 @@
     save(list) { store.set("rs-registrations", list); },
     has(eventId) { return this.all().some((r) => r.eventId === eventId); },
   };
-  const spotsLeft = (ev) => Math.max(0, ev.spots - ev.taken - (regs.has(ev.id) ? 1 : 0));
+  // Events without `spots` have no cap.
+  const spotsLeft = (ev) => ev.spots ? Math.max(0, ev.spots - (ev.taken || 0) - (regs.has(ev.id) ? 1 : 0)) : Infinity;
+  const dayEnd = (iso) => { const d = parseDate(iso.slice(0, 10)); d.setHours(23, 59, 59); return d; };
+  const isClosed = (ev) => !!ev.deadline && dayEnd(ev.deadline) < new Date();
+  // Timed events drop off when they start; all-day ones at the end of their last day.
+  const upcomingEvents = () => {
+    const now = new Date();
+    return RS.events.filter((e) => (e.date.length > 10 ? parseDate(e.date) : dayEnd(e.ends || e.date)) > now)
+      .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  };
+  const shortDate = (iso) => { const d = parseDate(iso); return `${d.getDate()} ${months[d.getMonth()]}`; };
+  // One line that says when: "25 Nov, 14:00", "Open until 26 Nov" or "10–14 February 2027".
+  const whenText = (ev) => ev.when || (ev.dateLabel ? `${ev.dateLabel} ${shortDate(ev.date)}` : `${shortDate(ev.date)}${fmtTime(ev.date) ? `, ${fmtTime(ev.date)}` : ""}`);
 
   /* ---------- toast ---------- */
   let toastTimer;
@@ -217,5 +229,5 @@
     "color:#7f3286;font:13px Georgia,serif"
   );
 
-  window.RSU = { esc, $, $$, store, dateBlock, fmtLong, fmtTime, parseDate, months, toast, confetti, foundEgg, regs, spotsLeft, reduceMotion };
+  window.RSU = { esc, $, $$, store, dateBlock, fmtLong, fmtTime, parseDate, months, toast, confetti, foundEgg, regs, spotsLeft, isClosed, upcomingEvents, shortDate, whenText, reduceMotion };
 })();

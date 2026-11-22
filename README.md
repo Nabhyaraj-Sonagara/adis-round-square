@@ -2,7 +2,7 @@
 
 A static site with three pages:
 
-- `index.html`: **Common Ground**. The newsletter reader (switch issues), the six IDEALS and the RS Bulletin (highlights you can filter by IDEAL, plus upcoming events with live countdowns).
+- `index.html`: **Common Ground**. The newsletter reader (switch issues), the six IDEALS and the RS Bulletin (highlights you can filter by IDEAL, plus upcoming events you can filter by type, with details and live countdowns).
 - `committee.html`: the committee as flip cards. Tap a card to see contacts and copy an email or phone number. Search by name, role or IDEAL.
 - `register.html`: sign-up in three steps. Pick an event or project, add your details, then say in a few sentences why you are a good fit. You get a ticket with a meeting code and an "Add to calendar" file.
 
@@ -14,11 +14,11 @@ Open the folder with any static web server, for example `python3 -m http.server`
 
 ## Edit the content
 
-Everything is in **`js/data.js`**. All of it is sample content right now: replace the names, emails, phone numbers, stories and events before you publish.
+Everything is in **`js/data.js`**. The committee and events are real; the newsletter issues and highlights are still sample content.
 
 - `config.idealOfFortnight` sets the IDEAL shown as "Now".
 - `newsletters` holds the issues, newest first. Set `pdf` to a file path to show a download button.
-- `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filter on the Register page. Events with a past date disappear automatically.
+- `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filters on the Bulletin and Register page, plus `host`, `place`, `grades` and `body`. Optional: `deadline` (sign-ups close after that day), `dateLabel` (what the date means, such as "Open until"), `when` and `ends` for multi-day events, `prep`, `contact`, and `spots` + `taken` to cap places. Events disappear automatically once they are over.
 - `committee`: each member is in `students` (the student committee) or `teachers`.
 - Each IDEAL has one fixed colour, set in `css/styles.css` under "One colour per IDEAL".
 - The ASCII drawings (the globe on the home page, the circle in the square on Committee, the sun on Register) are canvas shaders in `js/ascii.js`.

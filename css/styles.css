@@ -325,6 +325,23 @@ body.sunrise .motto { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .upcoming .info { min-width: 0; flex: 1; }
 .upcoming .go { flex: none; align-self: center; font: 600 14px/18px var(--font-sans); color: var(--ink); text-decoration: none; padding: 6px 10px; border: 1px solid var(--ink); border-radius: var(--radius-sm); transition: background .2s, color .2s; }
 .upcoming .go:hover { background: var(--ink); color: var(--on-brand); }
+.upcoming .up-type { display: inline-block; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); margin-bottom: 2px; }
+.upcoming .up-type.t-postcard { color: var(--adis-blue); }
+.upcoming .up-type.t-collab { color: var(--rs-red-text); }
+.upcoming .up-type.t-conference { color: var(--adis-purple); }
+.upcoming .up-type.t-lab { color: var(--rs-gold-text); }
+.upcoming .up-closed { margin-top: var(--space-2); font: 600 14px/18px var(--font-sans); color: var(--rs-red-text); }
+.upcoming .empty { display: block; color: var(--ink-muted); }
+.up-more { margin-top: var(--space-2); }
+.up-more summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font: 600 14px/20px var(--font-sans); color: var(--adis-blue); list-style: none; }
+.up-more summary::-webkit-details-marker { display: none; }
+.up-more summary::before { content: ""; width: 8px; height: 8px; border: 2px solid currentColor; border-radius: 1px; transition: border-radius .35s var(--ease-bounce), background .2s; }
+.up-more[open] summary::before { border-radius: 50%; background: currentColor; }
+.up-more p { margin: var(--space-2) 0 0; font-size: 15px; line-height: 23px; color: var(--ink-muted); }
+.up-more p b { display: block; font: 600 13px/18px var(--font-sans); color: var(--ink); }
+.up-toggle { margin-top: var(--space-4); }
+.up-toggle[hidden] { display: none; }
+@media (max-width: 480px) { .upcoming li { display: grid; grid-template-columns: 56px minmax(0, 1fr); } .upcoming .go { grid-column: 2; justify-self: start; } }
 .tminus { display: inline-flex; align-items: baseline; gap: 6px; margin-top: var(--space-2); font: 600 14px/18px var(--font-sans); color: var(--rs-gold-text); font-variant-numeric: tabular-nums; }
 .tminus .digits { display: inline-flex; perspective: 200px; }
 .tminus .digits b { display: inline-block; min-width: .62em; text-align: center; font-weight: 600; color: var(--ink); }
@@ -364,6 +381,7 @@ body.sunrise .motto { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .roster li:hover .avatar { border-radius: var(--radius-sm); transform: rotate(-8deg); }
 .roster .who strong { display: block; font: 600 19px/24px var(--font-sans); }
 .roster .who span, .roster .grade { font: 500 15px/20px var(--font-sans); color: var(--ink-muted); }
+.roster .who .note { display: block; font: italic 400 15px/20px var(--font-serif); color: var(--adis-purple); }
 .roster .grade b { display: block; color: var(--ink); font-weight: 500; }
 .contact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .contact-row { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
