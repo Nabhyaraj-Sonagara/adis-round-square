@@ -21,6 +21,8 @@ Everything is in **`js/data.js`**. All of it is sample content right now: replac
 - `events`: each has a `tag` (`lab`, `postcard`, `collab` or `conference`), which drives the filter on the Register page. Events with a past date disappear automatically.
 - `committee`: each member is in `students` (the student committee) or `teachers`.
 - Each IDEAL has one fixed colour, set in `css/styles.css` under "One colour per IDEAL".
+- The ASCII drawings (the globe on the home page, the circle in the square on Committee, the sun on Register) are canvas shaders in `js/ascii.js`.
+- After changing CSS or JS, raise the `?v=` number on the `<link>` and `<script>` tags in the three HTML files so browsers fetch the new files.
 
 ## Collecting registrations
 

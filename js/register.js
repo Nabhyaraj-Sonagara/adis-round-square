@@ -1,12 +1,15 @@
-/* Register: three-step form, ticket, calendar file and "My registrations". */
+/* Register: three-step form, launch sequence, printed ticket, calendar file and "My registrations". */
 (function () {
   const RS = window.RS;
-  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft } = window.RSU;
+  const { esc, $, $$, dateBlock, fmtLong, fmtTime, parseDate, toast, confetti, regs, spotsLeft, reduceMotion } = window.RSU;
   const order = ["I", "D", "E", "A", "L", "S"];
   const form = $("#reg-form");
   const now = new Date();
   const events = RS.events.filter((e) => parseDate(e.date) > now).sort((a, b) => parseDate(a.date) - parseDate(b.date));
   const byId = (id) => RS.events.find((e) => e.id === id);
+  const where = (e) => e.place.split(",")[0];
+
+  window.RSAscii.mount($("#sun-canvas"), window.RSAscii.sunrise(), { bg: "#7f3286", cell: 13 });
 
   let step = 1, typeFilter = "all", lastReg = null;
   let picked = new URLSearchParams(location.search).get("event");
@@ -23,19 +26,20 @@
         <div class="pick">
           <input type="radio" name="event" id="ev-${e.id}" value="${e.id}" ${picked === e.id ? "checked" : ""} ${mine || full ? "disabled" : ""}>
           <label for="ev-${e.id}">
-            <span class="check" aria-hidden="true">✓</span>
-            <span class="top">${dateBlock(e.date, i % 2 === 1)}<span>
+            <span class="radio" aria-hidden="true"></span>
+            ${dateBlock(e.date, i % 2 === 1)}
+            <span>
               <span class="type-tag ${mine ? "mine" : `t-${e.tag}`}">${mine ? "You're in" : esc(RS.tags[e.tag].one)}</span>
-              <span class="caption" style="display:block;margin-top:6px">${fmtTime(e.date)}, Grades ${esc(e.grades)}</span>
-            </span></span>
-            <h3>${esc(e.title)}</h3>
-            <p>${esc(e.body)}</p>
-            <span class="caption">${esc(e.place)}</span>
-            <span class="spots">${full ? "Full. Ask the committee about the waitlist." : `${left} of ${e.spots} spots left`}</span>
-            <span class="meter ${left <= 5 ? "low" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span>
+              <h3>${esc(e.title)}</h3>
+              <p>${esc(e.body)}</p>
+              <span class="meta">${fmtTime(e.date)}, Grades ${esc(e.grades)}. ${esc(e.place)}</span>
+            </span>
+            <span class="avail">${full ? "<strong>Full</strong>Ask about the waitlist" : `<strong>${left}</strong>of ${e.spots} spots left`}
+              <span class="meter ${left <= 5 ? "low" : ""}" aria-hidden="true"><i style="width:${pct}%"></i></span>
+            </span>
           </label>
         </div>`;
-    }).join("") || `<p class="empty" style="grid-column:1/-1">Nothing here right now. New events go up every fortnight.</p>`;
+    }).join("") || `<p class="empty">Nothing here right now. New events go up every fortnight.</p>`;
   }
   $("#type-filter").innerHTML = `<button type="button" class="chip plain" data-t="all" aria-pressed="true">Everything</button>` +
     Object.entries(RS.tags).map(([k, t]) => `<button type="button" class="chip plain" data-t="${k}" aria-pressed="false">${esc(t.many)}</button>`).join("");
@@ -55,7 +59,7 @@
 
   /* ---------- Step 3: IDEALS chips ---------- */
   const why = new Set();
-  $("#why-ideals").innerHTML = order.map((k) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false"><b data-i="${k}">${k}</b>${esc(RS.ideals[k].name)}</button>`).join("");
+  $("#why-ideals").innerHTML = order.map((k) => `<button type="button" class="chip" data-k="${k}" aria-pressed="false"><span class="marker" data-i="${k}">${k}</span>${esc(RS.ideals[k].name)}</button>`).join("");
   $("#why-ideals").addEventListener("click", (e) => {
     const c = e.target.closest(".chip");
     if (!c) return;
@@ -69,24 +73,23 @@
   function renderSummary() {
     const e = picked && byId(picked);
     $("#your-pick").innerHTML = e ? `
-      <p class="caption" style="margin:0">Your pick</p>
+      <p class="label strong" style="margin:0">Your pick</p>
       <h3 class="title">${esc(e.title)}</h3>
-      <ul class="events"><li>${dateBlock(e.date)}<div><p class="caption" style="color:var(--ink)">${fmtLong(e.date)}</p><p class="caption">${fmtTime(e.date)}, ${esc(e.place.split(" · ")[0])}</p></div></li></ul>`
-      : `<p class="caption" style="margin:0">Your pick</p><p class="none" style="margin-top:8px">Choose what you'd like to join and it will show up here.</p>`;
+      <ul class="events"><li>${dateBlock(e.date)}<div><p class="caption" style="color:var(--ink)">${fmtLong(e.date)}</p><p class="caption">${fmtTime(e.date)}, ${esc(where(e))}</p></div></li></ul>`
+      : `<p class="label strong" style="margin:0">Your pick</p><p class="none">Choose what you'd like to join and it will show up here.</p>`;
   }
   function renderMine() {
     const list = regs.all().filter((r) => byId(r.eventId));
     $("#mine").innerHTML = list.length ? `<ul class="mine-list">${list.map((r) => {
       const e = byId(r.eventId);
-      return `<li>${dateBlock(e.date, true)}<span>${esc(e.title)}<br><span class="muted">${esc(r.code)}</span></span><button type="button" class="x" data-cancel="${esc(r.eventId)}" aria-label="Cancel registration for ${esc(e.title)}">×</button></li>`;
+      return `<li>${dateBlock(e.date, true)}<span>${esc(e.title)}<br><span class="muted">${esc(r.code)}</span></span><button type="button" class="x" data-cancel="${esc(r.eventId)}" aria-label="Cancel registration for ${esc(e.title)}">Cancel</button></li>`;
     }).join("")}</ul>` : `<p class="none">Nothing yet. Your tickets are kept on this device.</p>`;
   }
   $("#mine").addEventListener("click", (e) => {
     const b = e.target.closest("[data-cancel]");
     if (!b) return;
-    const id = b.dataset.cancel;
-    regs.save(regs.all().filter((r) => r.eventId !== id));
-    toast("Registration cancelled.", "×");
+    regs.save(regs.all().filter((r) => r.eventId !== b.dataset.cancel));
+    toast("Registration cancelled.", "✓");
     renderMine(); renderPicks();
   });
 
@@ -100,16 +103,14 @@
       if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
     });
     $("#steps").scrollIntoView({ behavior: "smooth", block: "start" });
-    const panel = $(`.panel[data-step="${n}"]`);
-    const first = panel.querySelector("input:not([type=radio]), select, textarea");
+    const first = $(`.panel[data-step="${n}"]`).querySelector("input:not([type=radio]), select, textarea");
     if (first && n !== 1) setTimeout(() => first.focus({ preventScroll: true }), 300);
   }
 
   function validStep(n) {
     if (n === 1) {
-      const ok = !!picked;
-      $("#pick-error").classList.toggle("show", !ok);
-      return ok;
+      $("#pick-error").classList.toggle("show", !picked);
+      return !!picked;
     }
     if (n === 2) {
       let firstBad = null;
@@ -133,17 +134,18 @@
     if (e.target.closest("[data-next]") && validStep(step)) go(step + 1);
     if (e.target.closest("[data-back]")) go(step - 1);
   });
-  // Clear an error as soon as it's fixed.
   form.addEventListener("input", (e) => e.target.closest(".field")?.classList.remove("invalid"));
   form.addEventListener("change", (e) => e.target.closest(".field")?.classList.remove("invalid"));
 
-  /* ---------- Submit ---------- */
+  /* ---------- Submit: a 3-2-1 launch, then the ticket prints ---------- */
   const code = () => "RS-" + Array.from({ length: 5 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (step !== 3) { if (validStep(step)) go(step + 1); return; }
     const btn = $("#submit-btn");
+    if (btn.disabled) return;
     btn.disabled = true;
     const reg = {
       code: code(),
@@ -159,13 +161,19 @@
       ts: new Date().toISOString(),
     };
 
-    let sent = null;
+    const label = btn.textContent;
+    let sending = Promise.resolve(null);
     if (RS.config.registrationEndpoint) {
-      try {
-        const res = await fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(reg) });
-        sent = res.ok;
-      } catch { sent = false; }
+      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(reg) })
+        .then((res) => res.ok).catch(() => false);
     }
+    if (!reduceMotion) {
+      btn.classList.add("counting");
+      for (const n of ["3", "2", "1", "Lift-off"]) { btn.textContent = n; await wait(n === "Lift-off" ? 500 : 420); }
+      btn.classList.remove("counting");
+    }
+    const sent = await sending;
+    btn.textContent = label;
     btn.disabled = false;
 
     regs.save([...regs.all().filter((r) => r.eventId !== reg.eventId), reg]);
@@ -173,7 +181,7 @@
     renderTicket(reg, sent);
     renderMine(); renderPicks();
     go(4);
-    confetti();
+    setTimeout(() => confetti(), reduceMotion ? 0 : 1300);
   });
 
   function renderTicket(r, sent) {
@@ -186,22 +194,25 @@
         ? `Your ticket is saved on this device, but it didn't reach the committee. Email your ticket code to ${mail} to confirm your place.`
         : `You're in. Keep your ticket code and show it at the event. Questions? Write to ${mail}.`;
     $("#ticket").innerHTML = `
-      <div class="ticket">
-        <div class="main">
-          <span class="eyebrow dot-eyebrow">${esc(RS.tags[e.tag].one)} ticket</span>
-          <h3 class="headline">${esc(e.title)}</h3>
-          <dl>
-            <div><dt>Name</dt><dd>${esc(r.name)}</dd></div>
-            <div><dt>Grade</dt><dd>${esc(r.grade)}${esc(r.section)}</dd></div>
-            <div><dt>Date</dt><dd>${parseDate(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</dd></div>
-            <div><dt>Time</dt><dd>${fmtTime(e.date)}</dd></div>
-            <div style="grid-column:span 2"><dt>Where</dt><dd>${esc(e.place)}</dd></div>
-          </dl>
-        </div>
-        <div class="stub">
-          <span class="eyebrow">Ticket code</span>
-          <span class="code">${esc(r.code)}</span>
-          <span class="barcode" aria-hidden="true">${bars.map((w, i) => `<i style="width:${w}px;opacity:${i % 3 ? 1 : .6}"></i>`).join("")}</span>
+      <div class="ticket-slot" aria-hidden="true"></div>
+      <div class="ticket-feed">
+        <div class="ticket">
+          <div class="main">
+            <span class="label">${esc(RS.tags[e.tag].one)} ticket</span>
+            <h3 class="headline">${esc(e.title)}</h3>
+            <dl>
+              <div><dt>Name</dt><dd>${esc(r.name)}</dd></div>
+              <div><dt>Grade</dt><dd>${esc(r.grade)}${esc(r.section)}</dd></div>
+              <div><dt>Date</dt><dd>${parseDate(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</dd></div>
+              <div><dt>Time</dt><dd>${fmtTime(e.date)}</dd></div>
+              <div style="grid-column:span 2"><dt>Where</dt><dd>${esc(e.place)}</dd></div>
+            </dl>
+          </div>
+          <div class="stub">
+            <span class="label">Ticket code</span>
+            <span class="code">${esc(r.code)}</span>
+            <span class="barcode" aria-hidden="true">${bars.map((w, i) => `<i style="width:${w}px;opacity:${i % 3 ? 1 : .6}"></i>`).join("")}</span>
+          </div>
         </div>
       </div>
       <p class="done-note">${note}</p>`;

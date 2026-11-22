@@ -82,7 +82,7 @@
     const isNew = !found.includes(id);
     if (isNew) { found.push(id); store.set("rs-eggs", found); }
     renderEggCounter();
-    toast(`${EGGS[id]}${isNew ? ` · Easter egg ${found.length} of ${Object.keys(EGGS).length}` : ""}`, "★");
+    toast(`${EGGS[id]}${isNew ? `. Easter egg ${found.length} of ${Object.keys(EGGS).length}` : ""}`, "★");
     if (isNew && found.length === Object.keys(EGGS).length) setTimeout(() => { toast("All six found. You are officially an IDEALS detective.", "★"); confetti(160); }, 3800);
   }
   function renderEggCounter() {
@@ -110,7 +110,7 @@
           <img src="assets/adis-crest.png" alt="Adani International School">
           <span class="divider"></span>
           <img class="rs-mark" src="assets/round-square-mark.png" alt="Round Square">
-          <span class="lockup-name">Adani International School<br>Round Square Committee</span>
+          <span class="lockup-name">Adani International School<span>Round Square Committee</span></span>
         </a>
         <nav aria-label="Main"><ul class="nav">
           ${navItems.map((n) => `<li><a href="${n.href}" class="${n.cta && page !== n.key ? "cta" : ""}"${page === n.key ? ' aria-current="page"' : ""}>${n.label}</a></li>`).join("")}
@@ -130,10 +130,11 @@
           <img src="assets/round-square-mark.png" alt="Round Square">
         </div>
         <div>
-          <p class="caption">ADIS Round Square Committee · <a href="mailto:${esc(RS.config.committeeEmail)}">${esc(RS.config.committeeEmail)}</a></p>
-          <p class="caption">Internationalism · Democracy · Environmentalism · Adventure · Leadership · Service</p>
+          <p class="label strong">ADIS Round Square Committee</p>
+          <p class="caption"><a href="mailto:${esc(RS.config.committeeEmail)}">${esc(RS.config.committeeEmail)}</a></p>
           <p id="egg-counter" class="egg-counter" hidden></p>
         </div>
+        <p class="caption" style="max-width:22ch">Internationalism, Democracy, Environmentalism, Adventure, Leadership and Service.</p>
       </div></div>`;
     renderEggCounter();
   }
