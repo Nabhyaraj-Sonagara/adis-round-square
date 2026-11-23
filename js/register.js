@@ -168,8 +168,10 @@
     const label = btn.textContent;
     let sending = Promise.resolve(null);
     if (RS.config.registrationEndpoint) {
-      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(reg) })
-        .then((res) => res.ok).catch(() => false);
+      // text/plain keeps this a "simple" request: Google Apps Script web apps don't answer
+      // CORS preflights, so a JSON content type would be blocked before it reached the sheet.
+      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8", Accept: "application/json" }, body: JSON.stringify(reg) })
+        .then((res) => res.ok ? res.json().then((j) => j.ok !== false, () => true) : false).catch(() => false);
     }
     if (!reduceMotion) {
       btn.classList.add("counting");

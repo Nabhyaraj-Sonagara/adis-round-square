@@ -26,7 +26,17 @@ Everything is in **`js/data.js`**. Events, highlights and the newsletter come fr
 
 ## Collecting registrations
 
-By default, registrations are saved only in the student's own browser (they appear under "My registrations"). To collect them centrally, set `config.registrationEndpoint` to a URL that accepts a JSON POST, such as a Formspree form or a Google Apps Script web app that writes to a Sheet. Each registration has these fields: `code, eventId, eventTitle, name, grade, section, email, phone, suitability, notes, ts`.
+By default, registrations are saved only in the student's own browser (they appear under "My registrations"). To send every sign-up to the committee's Google Sheet as a new row:
+
+1. **Make sure it's a Google Sheet, not an uploaded Excel file.** Open the sheet; if the title has an `.XLSX` badge, choose **File > Save as Google Sheets** and use the new copy's ID (the long part of its URL between `/d/` and `/edit`) for `SPREADSHEET_ID` in `apps-script/Code.gs`.
+2. In the sheet, open **Extensions > Apps Script**, delete the sample code and paste in everything from `apps-script/Code.gs`. Save.
+3. **Deploy > New deployment**, type **Web app**. Set *Execute as*: **Me**, and *Who has access*: **Anyone**. Click **Deploy** and allow the permissions it asks for (Google may warn the app is unverified; choose *Advanced > Go to project*).
+4. Copy the **Web app URL** (it ends in `/exec`) and paste it into `config.registrationEndpoint` in `js/data.js`. Raise the `?v=` number on `data.js` in the three HTML files.
+5. Test: open the `/exec` URL in a browser (it should say the endpoint is running), then register for an event on the site and check that a row appears.
+
+Rows go to the tab in the sheet link (`gid=1264311299`); if that tab is missing, a **Registrations** tab is created. A header row is added if the tab is empty. Columns: Submitted at, Event code, Event ID, Event, Name, Grade, Section, Email, Phone, Why a good fit, Notes.
+
+If you edit `Code.gs` later, use **Deploy > Manage deployments > Edit > Version: New version** so the same URL runs the new code. If a sign-up can't reach the sheet, the student's ticket says so and asks them to email the committee.
 
 ## Easter eggs (committee eyes only)
 

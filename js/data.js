@@ -6,8 +6,8 @@
 window.RS = {
   config: {
     // Where registrations are sent. Leave empty to keep them on this device only
-    // (shown under "My registrations"). Paste a Formspree / Google Apps Script URL
-    // that accepts a JSON POST to collect them centrally.
+    // (shown under "My registrations"). To send them to the Google Sheet, paste the
+    // web-app URL from apps-script/Code.gs here (ends in /exec). See README.md.
     registrationEndpoint: "",
     committeeEmail: "kumar.abhishek@adaniinternational.edu.in",
     // The IDEAL in focus this fortnight (one of the keys in `ideals`).
