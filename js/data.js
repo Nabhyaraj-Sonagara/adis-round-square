@@ -8,7 +8,11 @@ window.RS = {
     // Where registrations are sent: the Web app URL (ending in /exec) of
     // apps-script/registrations.gs, which adds each one as a row in the committee's
     // Google Sheet. Leave empty to keep them on this device only.
-    registrationEndpoint: "https://script.google.com/macros/s/AKfycbw87fc2GE0FMH7ulWVikR7VkmEk-hxhiV4JSe-0NR7w_NAObMD0jZkxjdeeP_SNdNRl/exec",
+    registrationEndpoint: "https://script.google.com/a/macros/adaniinternational.edu.in/s/AKfycbw87fc2GE0FMH7ulWVikR7VkmEk-hxhiV4JSe-0NR7w_NAObMD0jZkxjdeeP_SNdNRl/exec",
+    // true while the web app only lets in @adaniinternational.edu.in accounts: each
+    // registration opens it in a new tab, where the student is signed in. Set to
+    // false if it is ever deployed for "Anyone"; registrations then send in the background.
+    registrationSignIn: true,
     committeeEmail: "kumar.abhishek@adaniinternational.edu.in",
     // The IDEAL in focus this fortnight (one of the keys in `ideals`).
     idealOfFortnight: "I",

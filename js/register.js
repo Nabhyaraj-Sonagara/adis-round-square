@@ -166,14 +166,25 @@
     };
 
     const label = btn.textContent;
-    let sending = Promise.resolve(null);
-    if (RS.config.registrationEndpoint) {
-      // Plain-text body so the browser skips the CORS preflight, which Apps Script can't answer.
+    let sending = Promise.resolve(null), sendUrl = "";
+    const endpoint = RS.config.registrationEndpoint;
+    if (endpoint) {
       const ev = byId(picked);
       const payload = { ...reg, eventWhen: whenText(ev), host: [ev.host, ev.place].filter(Boolean).join(", ") };
-      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
-        .then((res) => res.ok && res.json().then((j) => j.ok !== false, () => true))
-        .catch(() => false);
+      if (RS.config.registrationSignIn) {
+        // The web app only accepts signed-in school accounts, which a background request
+        // can't carry. Open it in a new tab instead (right away, while the click still
+        // counts, so pop-up blockers allow it); the tab adds the row and says so.
+        sendUrl = `${endpoint}?${new URLSearchParams(payload)}`;
+        const tab = window.open(sendUrl, "_blank");
+        if (tab) tab.opener = null;
+        sending = Promise.resolve(tab ? "tab" : false);
+      } else {
+        // Plain-text body so the browser skips the CORS preflight, which Apps Script can't answer.
+        sending = fetch(endpoint, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
+          .then((res) => res.ok && res.json().then((j) => j.ok !== false, () => true))
+          .catch(() => false);
+      }
     }
     if (!reduceMotion) {
       btn.classList.add("counting");
@@ -186,23 +197,28 @@
 
     regs.save([...regs.all().filter((r) => r.eventId !== reg.eventId), reg]);
     lastReg = reg;
-    renderTicket(reg, sent);
+    renderTicket(reg, sent, sendUrl);
     renderMine(); renderPicks();
     go(4);
     setTimeout(() => confetti(), reduceMotion ? 0 : 1300);
   });
 
-  function renderTicket(r, sent) {
+  function renderTicket(r, sent, sendUrl) {
     const e = byId(r.eventId);
     // A meeting code only when the host has shared one; otherwise the event code.
     const shown = e.meetingCode || r.code, kind = e.meetingCode ? "meeting code" : "event code";
     const bars = [...shown].flatMap((ch) => { const n = ch.charCodeAt(0); return [1 + (n % 3), 1 + ((n >> 2) % 3)]; });
     const mail = `<a href="mailto:${esc(RS.config.committeeEmail)}?subject=${encodeURIComponent(`Registration ${r.code}: ${e.title}`)}">${esc(RS.config.committeeEmail)}</a>`;
-    const note = sent === true
-      ? `You're in. The committee has your registration. Questions? Write to ${mail}.`
-      : sent === false
-        ? `Your ticket is saved on this device, but it didn't reach the committee. Email your ${kind} to ${mail} to confirm your place.`
-        : `You're in. Keep your ${kind} and show it at the event. Questions? Write to ${mail}.`;
+    const resend = sendUrl ? `<a href="${esc(sendUrl)}" target="_blank" rel="noopener">Send it to the committee</a>` : "";
+    const note = sent === "tab"
+      ? `A new tab is sending this to the committee. Sign in with your school account if it asks, then look for “Registration received”. No tab? ${resend}.`
+      : sent === true
+        ? `You're in. The committee has your registration. Questions? Write to ${mail}.`
+        : sent === false && resend
+          ? `Your ticket is saved on this device, but it hasn't reached the committee yet. ${resend}, or email your ${kind} to ${mail}.`
+          : sent === false
+            ? `Your ticket is saved on this device, but it didn't reach the committee. Email your ${kind} to ${mail} to confirm your place.`
+            : `You're in. Keep your ${kind} and show it at the event. Questions? Write to ${mail}.`;
     $("#ticket").innerHTML = `
       <div class="ticket-slot" aria-hidden="true"></div>
       <div class="ticket-feed">
