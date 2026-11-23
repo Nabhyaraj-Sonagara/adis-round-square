@@ -26,7 +26,7 @@ Everything is in **`js/data.js`**. Events, highlights and the newsletter come fr
 
 ## Collecting registrations
 
-By default, registrations are saved only in the student's own browser (they appear under "My registrations"). To collect them centrally, set `config.registrationEndpoint` to a URL that accepts a JSON POST, such as a Formspree form or a Google Apps Script web app that writes to a Sheet. Each registration has these fields: `code, eventId, eventTitle, name, grade, section, email, phone, suitability, notes, ts`.
+Registrations are saved in the student's own browser (under "My registrations") and, when `config.registrationEndpoint` is set, sent to the committee's Google Sheet through `apps-script/registrations.gs`. That script reads the sheet's header row and fills each column by name (Timestamp, Event code, Event, Event date, Host, Name, Grade, Section, Email, UID, Phone, Why suitable, Notes, in any order and with similar wording), leaving unknown columns blank. Setup steps are at the top of the script. Each registration sends these fields: `code, eventId, eventTitle, eventWhen, host, name, grade, section, email, phone, suitability, notes, ts`.
 
 ## Easter eggs (committee eyes only)
 

@@ -168,8 +168,12 @@
     const label = btn.textContent;
     let sending = Promise.resolve(null);
     if (RS.config.registrationEndpoint) {
-      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(reg) })
-        .then((res) => res.ok).catch(() => false);
+      // Plain-text body so the browser skips the CORS preflight, which Apps Script can't answer.
+      const ev = byId(picked);
+      const payload = { ...reg, eventWhen: whenText(ev), host: [ev.host, ev.place].filter(Boolean).join(", ") };
+      sending = fetch(RS.config.registrationEndpoint, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) })
+        .then((res) => res.ok && res.json().then((j) => j.ok !== false, () => true))
+        .catch(() => false);
     }
     if (!reduceMotion) {
       btn.classList.add("counting");
